@@ -1,0 +1,36 @@
+.product-list {
+  margin: 20px;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.json-container {
+  background-color: #2b2b2b;
+  color: #f8f8f2;
+  padding: 16px;
+  border-radius: 4px;
+  overflow: auto;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  max-height: 500px;
+}
+
+.loading {
+  margin: 20px;
+  padding: 20px;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+.error {
+  margin: 20px;
+  padding: 20px;
+  background-color: #fff0f0;
+  border-left: 4px solid #ff4040;
+  color: #c00;
+  border-radius: 4px;
+} 
