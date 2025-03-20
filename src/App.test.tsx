@@ -4,11 +4,13 @@ import App from './App';
 import '@testing-library/jest-dom';
 
 describe('App', () => {
-  it('renders the Vite and React logos', () => {
+  it('renders the WMS heading', () => {
     render(<App />);
 
-    // This assumes the default Vite React template which has "Vite + React" text
-    const linkElement = screen.getByText(/Vite \+ React/i);
-    expect(linkElement).toBeInTheDocument();
+    // Check for the new heading instead of "Vite + React"
+    const headingElement = screen.getByText(
+      /WMS - Warehouse Management System/i,
+    );
+    expect(headingElement).toBeInTheDocument();
   });
 });
