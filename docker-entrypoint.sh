@@ -5,9 +5,16 @@
 
 cat << EOF > /usr/share/nginx/html/env-config.js
 window.ENV = {
-  VITE_API_GATEWAY_URL: "${VITE_API_GATEWAY_URL:-http://api-gateway-service}"
+  VITE_WMS_API_GATEWAY_URL: "${VITE_WMS_API_GATEWAY_URL:-http://api-gateway-service}"
 };
 EOF
 
-# Execute the CMD
+# Pass the API URL to Nginx for the proxy configuration
+# Create a .conf file that exports the environment variable
+cat << EOF > /etc/nginx/conf.d/environment.conf
+env VITE_WMS_API_GATEWAY_URL;
+EOF
+
+# Execute the CMD with the environment variable
+export VITE_WMS_API_GATEWAY_URL="${VITE_WMS_API_GATEWAY_URL:-http://api-gateway-service}"
 exec "$@" 

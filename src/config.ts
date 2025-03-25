@@ -2,7 +2,7 @@
 declare global {
   interface Window {
     ENV?: {
-      VITE_API_GATEWAY_URL?: string;
+      VITE_WMS_API_GATEWAY_URL?: string;
     };
   }
 }
@@ -11,7 +11,7 @@ declare global {
 export const config = {
   // Priority: 1. Runtime env (from window.ENV) 2. Build-time env (from import.meta.env) 3. Default value
   apiUrl:
-    window.ENV?.VITE_API_GATEWAY_URL ||
-    import.meta.env.VITE_API_GATEWAY_URL ||
+    window.ENV?.VITE_WMS_API_GATEWAY_URL ||
+    import.meta.env.VITE_WMS_API_GATEWAY_URL ||
     'http://localhost:8080',
 };

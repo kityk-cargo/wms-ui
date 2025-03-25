@@ -15,7 +15,7 @@ COPY . .
 
 # Set the API URL from build arg (defaults to production URL)
 ARG API_URL=http://api-gateway-service
-ENV VITE_API_GATEWAY_URL=${API_URL}
+ENV VITE_WMS_API_GATEWAY_URL=${API_URL}
 
 # Build the app
 RUN npm run build
@@ -23,12 +23,19 @@ RUN npm run build
 # Stage 2: Serve the app with Nginx
 FROM nginx:stable-alpine
 
+# Install gettext for envsubst
+RUN apk add --no-cache gettext
+
 # Copy the nginx configuration for the React app
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # Copy custom nginx config for SPA routing
 RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx.conf /etc/nginx/conf.d
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Add Nginx module for environment variables
+RUN echo "load_module /usr/lib/nginx/modules/ngx_http_js_module.so;" > /etc/nginx/modules.conf
+RUN echo "include /etc/nginx/modules.conf;" >> /etc/nginx/nginx.conf
 
 # Expose port 80
 EXPOSE 80
