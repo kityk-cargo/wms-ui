@@ -4,6 +4,7 @@ import { defineConfig as defineVitestConfig } from "vitest/config";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: "/ui/",
   plugins: [react()],
   test: {
     environment: "jsdom",
