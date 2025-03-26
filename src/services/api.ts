@@ -15,6 +15,14 @@ export interface Product {
  */
 export async function fetchProducts(): Promise<Product[]> {
   try {
+    // Check if API URL is configured
+    if (!config.apiUrl) {
+      console.error(
+        'API URL is not configured. Please check your environment variables.',
+      );
+      throw new Error('API URL is not configured');
+    }
+
     const response = await fetch(`${config.apiUrl}/api/v1/products`);
 
     if (!response.ok) {

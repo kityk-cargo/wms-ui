@@ -13,8 +13,8 @@ RUN npm ci
 # Copy all files
 COPY . .
 
-# Set the API URL from build arg (defaults to production URL)
-ARG API_URL=http://api-gateway-service
+# Set the API URL from build arg (defaults to browser-accessible URL for local development)
+ARG API_URL=http://localhost:30080
 ENV VITE_WMS_API_GATEWAY_URL=${API_URL}
 
 # Build the app
