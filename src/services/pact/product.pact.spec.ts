@@ -69,6 +69,7 @@ describe('Products API Pact', () => {
     it('returns all products', async () => {
       // Arrange - Setup the expected interaction
       await provider.addInteraction({
+        state: 'products exist',
         uponReceiving: 'a request for all products',
         withRequest: {
           method: 'GET',
