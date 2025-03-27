@@ -2,12 +2,13 @@ import { config } from '../config';
 
 // Type definitions
 export interface Product {
-  id: string;
+  id: string | number;
+  sku: string;
   name: string;
+  category: string;
   description?: string;
-  price?: number;
-  sku?: string;
-  // Add other properties as needed
+  created_at: string;
+  updated_at: string;
 }
 
 /**
