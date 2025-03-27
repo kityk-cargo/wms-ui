@@ -24,6 +24,5 @@
     
     /* Types */
     "typeRoots": ["./node_modules/@types", "./src/types", "./node_modules/@pact-foundation"]
-  },
-  "include": ["src"]
+  }
 }
