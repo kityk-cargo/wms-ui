@@ -20,7 +20,9 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
-  },
-  "include": ["src"]
+    "noUncheckedSideEffectImports": true,
+    
+    /* Types */
+    "typeRoots": ["./node_modules/@types", "./src/types", "./node_modules/@pact-foundation"]
+  }
 }

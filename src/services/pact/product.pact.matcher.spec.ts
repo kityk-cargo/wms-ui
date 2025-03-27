@@ -58,6 +58,7 @@ describe('Products API Pact with Matchers', () => {
     it('returns all products', async () => {
       // Arrange - Setup the expected interaction with matchers
       await provider.addInteraction({
+        state: 'products exist',
         uponReceiving: 'a request for all products with matchers',
         withRequest: {
           method: 'GET',
