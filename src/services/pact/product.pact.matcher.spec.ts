@@ -10,6 +10,7 @@ import {
   vi,
 } from 'vitest';
 import { fetchProducts } from '../api';
+import * as path from 'path';
 
 // Must be before any constants declarations due to hoisting
 vi.mock('../../config', () => ({
@@ -19,6 +20,8 @@ vi.mock('../../config', () => ({
 }));
 
 const PACT_PORT = 9999;
+// Get the absolute path to the project root
+const PROJECT_ROOT = path.resolve(process.cwd());
 
 // Define product schema with matchers for more flexible contract
 const productSchema = {
@@ -33,11 +36,11 @@ const productSchema = {
 
 describe('Products API Pact with Matchers', () => {
   const provider = new Pact({
-    consumer: 'WmsUiConsumer',
-    provider: 'ProductApiProvider',
+    consumer: 'wms_ui',
+    provider: 'wms_inventory_management',
     port: PACT_PORT,
-    log: './logs/pact-matcher.log',
-    dir: './pacts',
+    log: path.join(PROJECT_ROOT, 'logs', 'pact-matcher.log'),
+    dir: path.join(PROJECT_ROOT, 'pacts'),
     pactfileWriteMode: 'merge',
     logLevel: 'warn',
   });
