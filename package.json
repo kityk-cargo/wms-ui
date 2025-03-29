@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:pact": "vitest run src/services/pact"
+    "test:pact": "vitest run src/services/pact && node scripts/organize-pacts.js",
+    "pact:organize": "node scripts/organize-pacts.js"
   },
   "dependencies": {
     "react": "^19.0.0",
