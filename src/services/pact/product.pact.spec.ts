@@ -46,6 +46,8 @@ const EXPECTED_PRODUCTS = [
 ];
 
 describe('Products API Pact', () => {
+  // Ensure consistent naming for proper pact organization
+  // Note: Provider name should match the backend service name exactly
   const provider = new Pact({
     consumer: 'wms_ui',
     provider: 'wms_inventory_management',
