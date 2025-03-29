@@ -93,8 +93,8 @@ jobs:
         env:
           CONTRACTS_PUSH_TOKEN: ${{ secrets.CONTRACTS_PUSH_TOKEN }}  # must be set with write permissions
         run: |
-            mkdir -p ./wms-contracts/pact/ui
-            cp -r ./pacts-transient/pacts/* ./wms-contracts/pact/ui/
+            mkdir -p ./wms-contracts/pact/rest
+            cp -r ./pacts-transient/pacts/* ./wms-contracts/pact/rest/
             cd ./wms-contracts
             git add -f .
             if ! git diff-index --quiet HEAD --; then
