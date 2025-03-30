@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
-    "@pact-foundation/pact": "^12.5.2",
+    "@pact-foundation/pact": "^15.0.1",
     "@pact-foundation/pact-node": "^10.18.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",

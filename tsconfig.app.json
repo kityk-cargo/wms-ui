@@ -23,6 +23,6 @@
     "noUncheckedSideEffectImports": true,
     
     /* Types */
-    "typeRoots": ["./node_modules/@types", "./src/types", "./node_modules/@pact-foundation"]
+    "typeRoots": ["./node_modules/@types", "./src/types"]
   }
 }
