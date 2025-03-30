@@ -23,6 +23,7 @@
     "noUncheckedSideEffectImports": true,
     
     /* Types */
-    "typeRoots": ["./node_modules/@types", "./src/types"]
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "types": ["node"]
   }
 }
