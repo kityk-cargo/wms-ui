@@ -13,7 +13,7 @@
     "test:watch": "vitest",
     "test:pact": "vitest run src/services/pact && node scripts/organize-pacts.js",
     "pact:organize": "node scripts/organize-pacts.js",
-    "mock-server": "node mock-server.cjs"
+    "mock-server": "node mock-server.js"
   },
   "dependencies": {
     "react": "^19.1.0",
