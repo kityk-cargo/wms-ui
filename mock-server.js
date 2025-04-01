@@ -224,6 +224,15 @@ const RouteBuilder = {
     };
 
     console.log(`Added route: ${method} ${path}`);
+    console.log("Route details:", {
+      method,
+      path,
+      status: response.status || 200,
+      headers: response.headers || {
+        "Content-Type": CONFIG.defaultContentType,
+      },
+      body: response.body,
+    });
   },
 };
 
@@ -331,6 +340,12 @@ function startMockServer() {
   Logger.logConfig();
 
   const contracts = ContractLoader.loadContracts();
+  console.log("Loaded contracts:", contracts);
+  contracts.forEach((contract) => {
+    (contract.interactions || []).forEach((interaction) => {
+      console.log("Interaction:", JSON.stringify(interaction));
+    });
+  });
   const routes = RouteBuilder.buildRoutes(contracts);
 
   Logger.logServerStart(contracts, routes);
