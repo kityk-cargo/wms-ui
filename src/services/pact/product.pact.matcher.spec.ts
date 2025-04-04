@@ -25,7 +25,8 @@ const PROJECT_ROOT = path.resolve(process.cwd());
 
 // Define product schema with matchers for more flexible contract
 const productSchema = {
-  id: Matchers.like('1'),
+  // Using integer matcher to enforce ID as integer
+  id: Matchers.integer(1), // Must be an integer, not a string
   sku: Matchers.like('SKU123'),
   name: Matchers.like('Product Name'),
   category: Matchers.like('Category'),
@@ -83,8 +84,11 @@ describe('Products API Pact with Matchers', () => {
       expect(products).toBeDefined();
       expect(Array.isArray(products)).toBe(true);
       expect(products.length).toBeGreaterThanOrEqual(2);
+
       // Verify product structure
       expect(products[0]).toHaveProperty('id');
+      expect(typeof products[0].id).toBe('number');
+      expect(Number.isInteger(products[0].id)).toBe(true); // Explicitly check it's an integer
       expect(products[0]).toHaveProperty('sku');
       expect(products[0]).toHaveProperty('name');
       expect(products[0]).toHaveProperty('category');
