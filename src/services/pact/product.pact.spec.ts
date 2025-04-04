@@ -26,7 +26,7 @@ const PROJECT_ROOT = path.resolve(process.cwd());
 // Sample product data that matches our expected contract
 const EXPECTED_PRODUCTS = [
   {
-    id: '1',
+    id: 1,
     sku: 'SKU123',
     name: 'Product 1',
     category: 'Category A',
@@ -35,7 +35,7 @@ const EXPECTED_PRODUCTS = [
     updated_at: '2023-01-02T00:00:00Z',
   },
   {
-    id: '2',
+    id: 2,
     sku: 'SKU456',
     name: 'Product 2',
     category: 'Category B',
