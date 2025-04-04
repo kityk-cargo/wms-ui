@@ -10,7 +10,7 @@ import { Product } from './api';
  */
 export const mockProducts: Product[] = [
   {
-    id: '1',
+    id: 1,
     sku: 'SKU001',
     name: 'Product A',
     category: 'Category Alpha',
@@ -19,7 +19,7 @@ export const mockProducts: Product[] = [
     updated_at: '2025-03-05T01:00:20.154260+00:00',
   },
   {
-    id: '2',
+    id: 2,
     sku: 'SKU002',
     name: 'Product B',
     category: 'Category Beta',
