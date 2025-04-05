@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchOrders } from '../services/api';
 import { Order } from '../types';
+import { formatCurrency, formatDate } from '../utils';
+import { LoadingState, ErrorMessage, StatusBadge } from '../components';
 import './OrderList.css';
 
 export function OrderList() {
@@ -27,28 +29,12 @@ export function OrderList() {
     getOrders();
   }, []);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
-
   if (loading) {
-    return <div className="loading">Loading orders...</div>;
+    return <LoadingState message="Loading orders..." />;
   }
 
   if (error) {
-    return <div className="error">{error}</div>;
+    return <ErrorMessage message={error} />;
   }
 
   return (
@@ -86,9 +72,7 @@ export function OrderList() {
                   <td>{order.customerId}</td>
                   <td>{formatDate(order.orderDate)}</td>
                   <td>
-                    <span className={`status-badge status-${order.status.toLowerCase()}`}>
-                      {order.status}
-                    </span>
+                    <StatusBadge status={order.status} />
                   </td>
                   <td>{formatCurrency(order.totalAmount)}</td>
                   <td>

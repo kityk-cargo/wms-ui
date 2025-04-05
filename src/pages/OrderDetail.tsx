@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchOrder } from '../services/api';
 import { Order } from '../types';
+import { formatCurrency, formatDateLong } from '../utils/formatters';
+import { LoadingState } from '../components/LoadingState';
+import { ErrorMessage } from '../components/ErrorMessage';
+import { StatusBadge } from '../components/StatusBadge';
 import './OrderDetail.css';
 
 export function OrderDetail() {
@@ -30,34 +34,16 @@ export function OrderDetail() {
     getOrder();
   }, [id]);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
-
   if (loading) {
-    return <div className="loading">Loading order details...</div>;
+    return <LoadingState message="Loading order details..." />;
   }
 
   if (error) {
-    return <div className="error">{error}</div>;
+    return <ErrorMessage message={error} />;
   }
 
   if (!order) {
-    return <div className="error">Order not found</div>;
+    return <ErrorMessage message="Order not found" />;
   }
 
   return (
@@ -81,13 +67,11 @@ export function OrderDetail() {
           <h2>Order Details</h2>
           <div className="detail-row">
             <span className="detail-label">Status:</span>
-            <span className={`status-badge status-${order.status.toLowerCase()}`}>
-              {order.status}
-            </span>
+            <StatusBadge status={order.status} />
           </div>
           <div className="detail-row">
             <span className="detail-label">Order Date:</span>
-            <span>{formatDate(order.orderDate)}</span>
+            <span>{formatDateLong(order.orderDate)}</span>
           </div>
           <div className="detail-row">
             <span className="detail-label">Customer ID:</span>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchProducts, createOrder } from '../services/api';
 import { Product, OrderItemCreate, OrderCreate as OrderCreateType } from '../types';
+import { formatCurrency } from '../utils/formatters';
 import './OrderCreate.css';
 
 // Step enum to track the current step in the order creation flow
@@ -69,14 +70,6 @@ export function OrderCreate() {
       newSelected.delete(productId);
       return newSelected;
     });
-  };
-
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
   };
 
   // Handle submitting the order

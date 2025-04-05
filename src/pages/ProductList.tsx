@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { fetchProducts } from '../services/api';
 import { Product } from '../types';
+import { formatDate } from '../utils/formatters';
 import './ProductList.css';
 
 export function ProductList() {
@@ -25,15 +26,6 @@ export function ProductList() {
 
     getProducts();
   }, []);
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
 
   if (loading) {
     return <div className="loading">Loading products...</div>;

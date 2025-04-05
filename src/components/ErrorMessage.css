@@ -1,0 +1,31 @@
+.error-container {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  background-color: #fee2e2;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+}
+
+.error-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: #ef4444;
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 1.25rem;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.error-message {
+  color: #b91c1c;
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+} 
