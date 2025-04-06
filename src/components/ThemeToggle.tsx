@@ -3,6 +3,7 @@ import {
   initializeTheme,
   applyTheme,
   setupThemeListeners,
+  removeThemeListeners,
   Theme,
 } from '../utils/theme';
 import './ThemeToggle.css';
@@ -23,7 +24,7 @@ export function ThemeToggle() {
 
     // Cleanup function to remove previously registered listeners
     return () => {
-      removeThemeListeners(theme);
+      removeThemeListeners();
     };
   }, [theme]);
 

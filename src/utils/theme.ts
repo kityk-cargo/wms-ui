@@ -47,17 +47,17 @@ export function applyTheme(theme: Theme): void {
   localStorage.setItem('theme', theme);
 }
 
+// Handler for system theme changes
+const handleThemeChange = (_e: MediaQueryListEvent) => {
+  applyTheme('system');
+};
+
 // Set up listeners for system theme changes
 export function setupThemeListeners(theme: Theme): void {
   if (theme === 'system') {
     const darkModeMediaQuery = window.matchMedia(
       '(prefers-color-scheme: dark)',
     );
-
-    // Handle system theme changes
-    const handleThemeChange = (_e: MediaQueryListEvent) => {
-      applyTheme('system');
-    };
 
     // Modern browsers
     if (darkModeMediaQuery.addEventListener) {
@@ -66,5 +66,18 @@ export function setupThemeListeners(theme: Theme): void {
       // Legacy support for older browsers
       darkModeMediaQuery.addListener(handleThemeChange);
     }
+  }
+}
+
+// Remove theme change listeners
+export function removeThemeListeners(): void {
+  const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+  // Modern browsers
+  if (darkModeMediaQuery.removeEventListener) {
+    darkModeMediaQuery.removeEventListener('change', handleThemeChange);
+  } else {
+    // Legacy support for older browsers
+    darkModeMediaQuery.removeListener(handleThemeChange);
   }
 }
