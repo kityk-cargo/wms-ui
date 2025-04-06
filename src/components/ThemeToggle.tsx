@@ -20,6 +20,11 @@ export function ThemeToggle() {
 
     // Set up listeners for system theme changes
     setupThemeListeners(theme);
+
+    // Cleanup function to remove previously registered listeners
+    return () => {
+      removeThemeListeners(theme);
+    };
   }, [theme]);
 
   const handleThemeChange = (newTheme: Theme) => {
