@@ -1,11 +1,11 @@
 .error-container {
   display: flex;
   align-items: center;
-  padding: 1.5rem;
-  background-color: #fee2e2;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1.5rem;
+  padding: var(--spacing-6);
+  background-color: var(--danger-light);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--spacing-6);
 }
 
 .error-icon {
@@ -14,17 +14,17 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  background-color: #ef4444;
-  color: white;
+  background-color: var(--danger);
+  color: var(--text-inverted);
   border-radius: 50%;
   font-weight: bold;
   font-size: 1.25rem;
-  margin-right: 1rem;
+  margin-right: var(--spacing-4);
   flex-shrink: 0;
 }
 
 .error-message {
-  color: #b91c1c;
+  color: var(--danger-dark);
   margin: 0;
   font-size: 0.9375rem;
   line-height: 1.5;

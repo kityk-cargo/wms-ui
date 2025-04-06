@@ -7,92 +7,92 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-8);
 }
 
 .order-list-header h1 {
   margin: 0;
   font-size: 2rem;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .order-table-container {
   overflow-x: auto;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  border-radius: var(--border-radius-md);
 }
 
 .order-table {
   width: 100%;
   border-collapse: collapse;
-  background-color: white;
+  background-color: var(--bg-surface);
 }
 
 .order-table th,
 .order-table td {
-  padding: 1rem;
+  padding: var(--spacing-4);
   text-align: left;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .order-table th {
-  background-color: #f8fafc;
+  background-color: var(--bg-muted);
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .order-table tbody tr:hover {
-  background-color: #f8fafc;
+  background-color: var(--bg-hover);
 }
 
 .status-badge {
   display: inline-block;
   padding: 0.25rem 0.75rem;
-  border-radius: 50px;
+  border-radius: var(--border-radius-full);
   font-size: 0.75rem;
   font-weight: 500;
   text-transform: uppercase;
 }
 
 .status-pending {
-  background-color: #fef9c3;
-  color: #854d0e;
+  background-color: var(--status-pending-bg);
+  color: var(--status-pending-text);
 }
 
 .status-allocated {
-  background-color: #e0f2fe;
-  color: #0369a1;
+  background-color: var(--status-allocated-bg);
+  color: var(--status-allocated-text);
 }
 
 .status-processing {
-  background-color: #dbeafe;
-  color: #1e40af;
+  background-color: var(--status-processing-bg);
+  color: var(--status-processing-text);
 }
 
 .status-shipped {
-  background-color: #dcfce7;
-  color: #166534;
+  background-color: var(--status-shipped-bg);
+  color: var(--status-shipped-text);
 }
 
 .status-delivered {
-  background-color: #bbf7d0;
-  color: #15803d;
+  background-color: var(--status-delivered-bg);
+  color: var(--status-delivered-text);
 }
 
 .status-cancelled {
-  background-color: #fee2e2;
-  color: #b91c1c;
+  background-color: var(--status-cancelled-bg);
+  color: var(--status-cancelled-text);
 }
 
 .btn-icon {
   display: inline-block;
   padding: 0.25rem 0.5rem;
-  background-color: #e0f2fe;
-  color: #0284c7;
-  border-radius: 4px;
+  background-color: var(--primary-light);
+  color: var(--primary);
+  border-radius: var(--border-radius-sm);
   text-decoration: none;
   font-size: 0.875rem;
   font-weight: 500;
@@ -100,27 +100,27 @@
 }
 
 .btn-icon:hover {
-  background-color: #bae6fd;
+  background-color: var(--primary-border);
 }
 
 .no-orders {
   text-align: center;
-  padding: 3rem;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  color: #64748b;
+  padding: var(--spacing-12);
+  background-color: var(--bg-surface);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+  color: var(--text-secondary);
 }
 
 .loading, .error {
   text-align: center;
-  padding: 2rem;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: var(--spacing-8);
+  background-color: var(--bg-surface);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
 }
 
 .error {
-  color: #b91c1c;
-  background-color: #fee2e2;
+  color: var(--danger-dark);
+  background-color: var(--danger-light);
 } 

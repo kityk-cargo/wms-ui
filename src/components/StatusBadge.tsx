@@ -1,7 +1,13 @@
 import React from 'react';
 import './StatusBadge.css';
 
-type OrderStatus = 'Pending' | 'Allocated' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+type OrderStatus =
+  | 'Pending'
+  | 'Allocated'
+  | 'Processing'
+  | 'Shipped'
+  | 'Delivered'
+  | 'Cancelled';
 
 interface StatusBadgeProps {
   status: OrderStatus;
@@ -16,4 +22,4 @@ export function StatusBadge({ status }: StatusBadgeProps) {
       {status}
     </span>
   );
-} 
+}

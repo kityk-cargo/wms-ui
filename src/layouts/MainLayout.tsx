@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { ThemeToggle } from '../components';
 import './MainLayout.css';
 
 interface MainLayoutProps {
@@ -26,6 +27,9 @@ export function MainLayout({ children }: MainLayoutProps) {
             </li>
           </ul>
         </nav>
+        <div className="header-actions">
+          <ThemeToggle />
+        </div>
       </header>
       <main className="app-content">{children}</main>
       <footer className="app-footer">
@@ -33,4 +37,4 @@ export function MainLayout({ children }: MainLayoutProps) {
       </footer>
     </div>
   );
-} 
+}

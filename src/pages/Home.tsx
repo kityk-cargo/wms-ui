@@ -6,7 +6,9 @@ export function Home() {
     <div className="home-page">
       <div className="hero-section">
         <h1>Welcome to the Warehouse Management System</h1>
-        <p>Manage your inventory, orders, and warehouse operations efficiently</p>
+        <p>
+          Manage your inventory, orders, and warehouse operations efficiently
+        </p>
         <div className="action-buttons">
           <Link to="/orders/create" className="btn btn-primary">
             Create Order
@@ -33,4 +35,4 @@ export function Home() {
       </div>
     </div>
   );
-} 
+}

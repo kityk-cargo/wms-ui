@@ -136,7 +136,10 @@ export async function createOrder(orderData: OrderCreate): Promise<Order> {
 /**
  * Updates an existing order
  */
-export async function updateOrder(id: number, orderData: Order): Promise<Order> {
+export async function updateOrder(
+  id: number,
+  orderData: Order,
+): Promise<Order> {
   try {
     if (!config.apiUrl) {
       throw new Error('API URL is not configured');

@@ -71,4 +71,4 @@ export function ProductList() {
       )}
     </div>
   );
-} 
+}

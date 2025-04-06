@@ -17,7 +17,7 @@ export function OrderDetail() {
   useEffect(() => {
     const getOrder = async () => {
       if (!id) return;
-      
+
       try {
         setLoading(true);
         const data = await fetchOrder(Number(id));
@@ -79,7 +79,9 @@ export function OrderDetail() {
           </div>
           <div className="detail-row">
             <span className="detail-label">Total Amount:</span>
-            <span className="total-amount">{formatCurrency(order.totalAmount)}</span>
+            <span className="total-amount">
+              {formatCurrency(order.totalAmount)}
+            </span>
           </div>
           {order.notes && (
             <div className="detail-row">
@@ -140,8 +142,12 @@ export function OrderDetail() {
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan={3} className="total-label">Total:</td>
-                <td className="total-value">{formatCurrency(order.totalAmount)}</td>
+                <td colSpan={3} className="total-label">
+                  Total:
+                </td>
+                <td className="total-value">
+                  {formatCurrency(order.totalAmount)}
+                </td>
               </tr>
             </tfoot>
           </table>
@@ -149,4 +155,4 @@ export function OrderDetail() {
       </div>
     </div>
   );
-} 
+}

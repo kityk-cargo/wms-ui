@@ -15,4 +15,4 @@ export function LoadingState({ message = 'Loading...' }: LoadingStateProps) {
       <p className="loading-message">{message}</p>
     </div>
   );
-} 
+}

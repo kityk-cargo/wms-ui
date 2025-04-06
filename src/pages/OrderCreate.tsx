@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchProducts, createOrder } from '../services/api';
-import { Product, OrderItemCreate, OrderCreate as OrderCreateType } from '../types';
+import {
+  Product,
+  OrderItemCreate,
+  OrderCreate as OrderCreateType,
+} from '../types';
 import { formatCurrency } from '../utils/formatters';
 import './OrderCreate.css';
 
@@ -15,17 +19,17 @@ enum OrderCreationStep {
 export function OrderCreate() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<OrderCreationStep>(
-    OrderCreationStep.ProductSelection
+    OrderCreationStep.ProductSelection,
   );
-  
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Order data state
-  const [selectedProducts, setSelectedProducts] = useState<Map<number, OrderItemCreate>>(
-    new Map()
-  );
+  const [selectedProducts, setSelectedProducts] = useState<
+    Map<number, OrderItemCreate>
+  >(new Map());
   const [customerId, setCustomerId] = useState<number>(1); // Default customer ID
   const [submitting, setSubmitting] = useState(false);
   const [orderResponse, setOrderResponse] = useState<any>(null);
@@ -52,7 +56,7 @@ export function OrderCreate() {
   // Handle adding a product to the order
   const handleAddProduct = (product: Product, quantity: number) => {
     if (quantity <= 0) return;
-    
+
     setSelectedProducts((prevSelected) => {
       const newSelected = new Map(prevSelected);
       newSelected.set(product.id, {
@@ -76,26 +80,26 @@ export function OrderCreate() {
   const handleSubmitOrder = async () => {
     try {
       setSubmitting(true);
-      
+
       // Convert selectedProducts Map to array for API
       const items = Array.from(selectedProducts.values());
-      
+
       // Check if there are any items
       if (items.length === 0) {
         setError('Your order must contain at least one product.');
         setSubmitting(false);
         return;
       }
-      
+
       const orderData: OrderCreateType = {
         customerId,
         items,
       };
-      
+
       // Call API to create order
       const response = await createOrder(orderData);
       setOrderResponse(response);
-      
+
       // Move to confirmation step
       setCurrentStep(OrderCreationStep.OrderConfirmation);
       setError(null);
@@ -124,12 +128,12 @@ export function OrderCreate() {
     return (
       <div className="product-selection">
         <h2>Select Products for Your Order</h2>
-        
+
         <div className="selected-count">
           {selectedProducts.size > 0 ? (
             <div>
               <span>{selectedProducts.size} product(s) selected</span>
-              <button 
+              <button
                 className="btn btn-primary proceed-btn"
                 onClick={() => setCurrentStep(OrderCreationStep.OrderReview)}
               >
@@ -140,16 +144,16 @@ export function OrderCreate() {
             <span>No products selected yet</span>
           )}
         </div>
-        
+
         <div className="product-grid">
           {products.map((product) => {
             const selectedItem = selectedProducts.get(product.id);
             const isSelected = !!selectedItem;
             const quantity = selectedItem?.quantity || 0;
-            
+
             return (
-              <div 
-                key={product.id} 
+              <div
+                key={product.id}
                 className={`product-card ${isSelected ? 'selected' : ''}`}
               >
                 <div className="product-header">
@@ -158,15 +162,17 @@ export function OrderCreate() {
                 </div>
                 <div className="product-category">{product.category}</div>
                 {product.description && (
-                  <div className="product-description">{product.description}</div>
+                  <div className="product-description">
+                    {product.description}
+                  </div>
                 )}
-                
+
                 <div className="product-controls">
                   <div className="quantity-control">
                     <label htmlFor={`qty-${product.id}`}>Quantity:</label>
-                    <input 
+                    <input
                       id={`qty-${product.id}`}
-                      type="number" 
+                      type="number"
                       min="1"
                       value={quantity || 1}
                       onChange={(e) => {
@@ -177,16 +183,16 @@ export function OrderCreate() {
                       }}
                     />
                   </div>
-                  
+
                   {isSelected ? (
                     <div className="action-buttons">
-                      <button 
+                      <button
                         className="btn btn-secondary"
                         onClick={() => handleAddProduct(product, quantity)}
                       >
                         Update
                       </button>
-                      <button 
+                      <button
                         className="btn btn-danger"
                         onClick={() => handleRemoveProduct(product.id)}
                       >
@@ -194,7 +200,7 @@ export function OrderCreate() {
                       </button>
                     </div>
                   ) : (
-                    <button 
+                    <button
                       className="btn btn-primary"
                       onClick={() => handleAddProduct(product, 1)}
                     >
@@ -216,7 +222,7 @@ export function OrderCreate() {
       return (
         <div className="empty-order">
           <p>Your order is empty. Please add some products.</p>
-          <button 
+          <button
             className="btn btn-primary"
             onClick={() => setCurrentStep(OrderCreationStep.ProductSelection)}
           >
@@ -227,27 +233,27 @@ export function OrderCreate() {
     }
 
     // Calculate total
-    let totalAmount = 0;
-    
+    const totalAmount = 0;
+
     return (
       <div className="order-review">
         <h2>Review Your Order</h2>
-        
+
         <div className="order-metadata">
           <div className="metadata-field">
             <label htmlFor="customer-id">Customer ID:</label>
-            <input 
+            <input
               id="customer-id"
-              type="number" 
+              type="number"
               min="1"
               value={customerId}
               onChange={(e) => setCustomerId(parseInt(e.target.value, 10) || 1)}
             />
           </div>
-          
+
           {/* Additional metadata fields could be added here */}
         </div>
-        
+
         <div className="order-items">
           <h3>Order Items</h3>
           <div className="order-items-table-container">
@@ -260,57 +266,62 @@ export function OrderCreate() {
                 </tr>
               </thead>
               <tbody>
-                {Array.from(selectedProducts.entries()).map(([productId, item]) => {
-                  const product = products.find(p => p.id === productId);
-                  if (!product) return null;
-                  
-                  return (
-                    <tr key={productId}>
-                      <td>
-                        <div className="product-info">
-                          <span className="product-name">{product.name}</span>
-                          <span className="product-sku">SKU: {product.sku}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="quantity-control inline">
-                          <input 
-                            type="number" 
-                            min="1"
-                            value={item.quantity}
-                            onChange={(e) => {
-                              const newQty = parseInt(e.target.value, 10) || 1;
-                              if (newQty > 0) {
-                                handleAddProduct(product, newQty);
-                              }
-                            }}
-                          />
-                        </div>
-                      </td>
-                      <td>
-                        <button 
-                          className="btn-icon danger"
-                          onClick={() => handleRemoveProduct(productId)}
-                        >
-                          Remove
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {Array.from(selectedProducts.entries()).map(
+                  ([productId, item]) => {
+                    const product = products.find((p) => p.id === productId);
+                    if (!product) return null;
+
+                    return (
+                      <tr key={productId}>
+                        <td>
+                          <div className="product-info">
+                            <span className="product-name">{product.name}</span>
+                            <span className="product-sku">
+                              SKU: {product.sku}
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="quantity-control inline">
+                            <input
+                              type="number"
+                              min="1"
+                              value={item.quantity}
+                              onChange={(e) => {
+                                const newQty =
+                                  parseInt(e.target.value, 10) || 1;
+                                if (newQty > 0) {
+                                  handleAddProduct(product, newQty);
+                                }
+                              }}
+                            />
+                          </div>
+                        </td>
+                        <td>
+                          <button
+                            className="btn-icon danger"
+                            onClick={() => handleRemoveProduct(productId)}
+                          >
+                            Remove
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  },
+                )}
               </tbody>
             </table>
           </div>
         </div>
-        
+
         <div className="order-actions">
-          <button 
+          <button
             className="btn btn-secondary"
             onClick={() => setCurrentStep(OrderCreationStep.ProductSelection)}
           >
             Back to Products
           </button>
-          <button 
+          <button
             className="btn btn-primary"
             onClick={handleSubmitOrder}
             disabled={submitting}
@@ -318,7 +329,7 @@ export function OrderCreate() {
             {submitting ? 'Saving Order...' : 'Save Order'}
           </button>
         </div>
-        
+
         {error && <div className="error">{error}</div>}
       </div>
     );
@@ -335,7 +346,7 @@ export function OrderCreate() {
         <div className="confirmation-icon">✓</div>
         <h2>Order Created Successfully!</h2>
         <p>Your order has been saved with the following details:</p>
-        
+
         <div className="confirmation-details">
           <div className="detail-row">
             <span className="detail-label">Order ID:</span>
@@ -349,24 +360,28 @@ export function OrderCreate() {
           )}
           <div className="detail-row">
             <span className="detail-label">Status:</span>
-            <span className={`status-badge status-${orderResponse.status.toLowerCase()}`}>
+            <span
+              className={`status-badge status-${orderResponse.status.toLowerCase()}`}
+            >
               {orderResponse.status}
             </span>
           </div>
           <div className="detail-row">
             <span className="detail-label">Total Amount:</span>
-            <span className="total-amount">{formatCurrency(orderResponse.totalAmount)}</span>
+            <span className="total-amount">
+              {formatCurrency(orderResponse.totalAmount)}
+            </span>
           </div>
         </div>
-        
+
         <div className="confirmation-actions">
-          <button 
+          <button
             className="btn btn-secondary"
             onClick={() => navigate('/orders')}
           >
             View All Orders
           </button>
-          <button 
+          <button
             className="btn btn-primary"
             onClick={() => navigate(`/orders/${orderResponse.id}`)}
           >
@@ -396,9 +411,9 @@ export function OrderCreate() {
       <div className="order-create-header">
         <h1>Create New Order</h1>
       </div>
-      
+
       <div className="order-steps">
-        <div 
+        <div
           className={`step ${currentStep === OrderCreationStep.ProductSelection ? 'active' : ''} 
                      ${currentStep > OrderCreationStep.ProductSelection ? 'completed' : ''}`}
           onClick={() => {
@@ -411,13 +426,16 @@ export function OrderCreate() {
           <div className="step-label">Product Selection</div>
         </div>
         <div className="step-connector"></div>
-        <div 
+        <div
           className={`step ${currentStep === OrderCreationStep.OrderReview ? 'active' : ''} 
                      ${currentStep > OrderCreationStep.OrderReview ? 'completed' : ''}`}
           onClick={() => {
             if (currentStep > OrderCreationStep.OrderReview) {
               setCurrentStep(OrderCreationStep.OrderReview);
-            } else if (selectedProducts.size > 0 && currentStep === OrderCreationStep.ProductSelection) {
+            } else if (
+              selectedProducts.size > 0 &&
+              currentStep === OrderCreationStep.ProductSelection
+            ) {
               setCurrentStep(OrderCreationStep.OrderReview);
             }
           }}
@@ -426,17 +444,15 @@ export function OrderCreate() {
           <div className="step-label">Review Order</div>
         </div>
         <div className="step-connector"></div>
-        <div 
+        <div
           className={`step ${currentStep === OrderCreationStep.OrderConfirmation ? 'active' : ''}`}
         >
           <div className="step-number">3</div>
           <div className="step-label">Order Confirmation</div>
         </div>
       </div>
-      
-      <div className="order-create-content">
-        {renderCurrentStep()}
-      </div>
+
+      <div className="order-create-content">{renderCurrentStep()}</div>
     </div>
   );
-} 
+}
