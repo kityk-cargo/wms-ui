@@ -11,11 +11,11 @@ import './OrderList.css';
  */
 export const OrderList = observer(() => {
   const orderStore = useOrderStore();
-  
+
   useEffect(() => {
     // Load orders when component mounts
     orderStore.loadOrders();
-    
+
     // Reset store when component unmounts
     return () => {
       orderStore.reset();

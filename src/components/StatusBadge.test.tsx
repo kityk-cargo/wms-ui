@@ -2,10 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { StatusBadge } from './StatusBadge';
+import { orderStatusValues } from '../test/test-utils';
 
 /**
  * Tests for the StatusBadge component
- * 
+ *
  * These tests verify that the StatusBadge component correctly:
  * - Renders with different status types
  * - Applies the appropriate CSS classes based on status
@@ -15,37 +16,32 @@ describe('StatusBadge Component', () => {
   /**
    * Test that badge renders with all the different statuses
    */
-  it.each([
-    'Pending',
-    'Allocated',
-    'Processing', 
-    'Shipped',
-    'Delivered',
-    'Cancelled'
-  ])('should render with %s status', (status) => {
+  it.each(orderStatusValues)('should render with %s status', (statusValue) => {
     // Arrange & Act
-    render(<StatusBadge status={status} />);
-    
+    render(<StatusBadge status={statusValue} />);
+
     // Assert
-    const badge = screen.getByText(status);
+    const badge = screen.getByText(statusValue);
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveClass('status-badge');
-    expect(badge).toHaveClass(`status-${status.toLowerCase()}`);
+    expect(badge).toHaveClass(`status-${statusValue.toLowerCase()}`);
   });
 
   /**
-   * Test that all possible status values are rendered with correct case-insensitive class
+   * Test that status value is correctly processed for CSS class
    */
   it('should convert status to lowercase for CSS class', () => {
-    // Arrange - component should automatically lowercase the status for the class
-    
-    // Act - for this test we'll use a non-standard casing
-    render(<StatusBadge status="SHIPPED" />);
-    
+    // Arrange - using uppercase status
+    const uppercaseStatus = 'SHIPPED' as 'Shipped';
+    const lowercaseClass = 'status-shipped';
+
+    // Act
+    render(<StatusBadge status={uppercaseStatus} />);
+
     // Assert
-    const badge = screen.getByText('SHIPPED');
-    expect(badge).toHaveClass('status-shipped'); // Class should be lowercase
-    expect(badge).not.toHaveClass('status-SHIPPED'); // Not with uppercase
+    const badge = screen.getByText(uppercaseStatus);
+    expect(badge).toHaveClass(lowercaseClass);
+    expect(badge).not.toHaveClass(`status-${uppercaseStatus}`);
   });
 
   /**
@@ -53,27 +49,27 @@ describe('StatusBadge Component', () => {
    */
   it('should display the status text exactly as provided', () => {
     // Arrange
-    
-    // Act - test with mixed case
-    render(<StatusBadge status="ShIpPeD" />);
-    
+    const mixedCaseStatus = 'sHiPpEd' as 'Shipped';
+
+    // Act
+    render(<StatusBadge status={mixedCaseStatus} />);
+
     // Assert
-    // Text content should match the original, not be normalized
-    expect(screen.getByText('ShIpPeD')).toBeInTheDocument();
+    expect(screen.getByText(mixedCaseStatus)).toBeInTheDocument();
   });
 
   /**
-   * Test that badge has appropriate accessibility semantics
+   * Test for semantic meaning and correct element type
    */
-  it('should have semantic meaning as a status indicator', () => {
+  it('should render as a span element with status indicator role', () => {
     // Arrange
-    
+    const testStatus = 'Processing';
+
     // Act
-    render(<StatusBadge status="Processing" />);
-    
+    render(<StatusBadge status={testStatus} />);
+
     // Assert
-    const badge = screen.getByText('Processing');
-    // Verify it's a span element as expected
+    const badge = screen.getByText(testStatus);
     expect(badge.tagName).toBe('SPAN');
   });
-}); 
+});

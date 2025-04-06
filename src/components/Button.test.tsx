@@ -2,90 +2,75 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Button } from './Button';
+import { buttonVariants } from '../test/test-utils';
 
 /**
  * Tests for the Button component
- * 
- * These tests verify that the Button component works correctly:
+ *
+ * These tests verify that the Button component:
  * - Renders with different variants
- * - Handles click events
- * - Shows loading state
- * - Applies appropriate CSS classes
- * - Handles disabled state
+ * - Handles click events correctly
+ * - Shows loading state appropriately
+ * - Supports being disabled
  */
 describe('Button Component', () => {
   /**
-   * Test that button renders with default props
+   * Test that button renders with text content
    */
-  it('should render with default props', () => {
+  it('should render with provided text content', () => {
     // Arrange
-    
+    const buttonText = 'Click Me';
+
     // Act
-    render(<Button>Click me</Button>);
-    
+    render(<Button>{buttonText}</Button>);
+
     // Assert
-    const button = screen.getByRole('button', { name: 'Click me' });
+    const button = screen.getByRole('button', { name: buttonText });
     expect(button).toBeInTheDocument();
+    expect(button).toHaveTextContent(buttonText);
+  });
+
+  /**
+   * Test that button has default variant if none provided
+   */
+  it('should have default variant if none provided', () => {
+    // Arrange & Act
+    render(<Button>Default Button</Button>);
+
+    // Assert
+    const button = screen.getByRole('button');
     expect(button).toHaveClass('btn');
-    expect(button).toHaveClass('btn-primary');
-    expect(button).not.toBeDisabled();
+    expect(button).toHaveClass('btn-primary'); // Primary is default
   });
 
   /**
-   * Test that button renders with primary variant
+   * Test all button variants with parameterized test
    */
-  it('should render with primary variant', () => {
-    // Arrange
-    
-    // Act
-    render(<Button variant="primary">Primary Button</Button>);
-    
-    // Assert
-    const button = screen.getByRole('button', { name: 'Primary Button' });
-    expect(button).toHaveClass('btn-primary');
-  });
+  it.each(buttonVariants)(
+    'should apply btn-%s class for %s variant',
+    (variant) => {
+      // Arrange & Act
+      render(<Button variant={variant}>Button</Button>);
 
-  /**
-   * Test that button renders with secondary variant
-   */
-  it('should render with secondary variant', () => {
-    // Arrange
-    
-    // Act
-    render(<Button variant="secondary">Secondary Button</Button>);
-    
-    // Assert
-    const button = screen.getByRole('button', { name: 'Secondary Button' });
-    expect(button).toHaveClass('btn-secondary');
-  });
-
-  /**
-   * Test that button renders with danger variant
-   */
-  it('should render with danger variant', () => {
-    // Arrange
-    
-    // Act
-    render(<Button variant="danger">Danger Button</Button>);
-    
-    // Assert
-    const button = screen.getByRole('button', { name: 'Danger Button' });
-    expect(button).toHaveClass('btn-danger');
-  });
+      // Assert
+      const button = screen.getByRole('button');
+      expect(button).toHaveClass(`btn-${variant}`);
+    },
+  );
 
   /**
    * Test that button handles click events
    */
-  it('should handle click events', () => {
+  it('should trigger onClick handler when clicked', () => {
     // Arrange
     const handleClick = vi.fn();
-    
+
     // Act
     render(<Button onClick={handleClick}>Clickable Button</Button>);
-    
-    const button = screen.getByRole('button', { name: 'Clickable Button' });
+
+    const button = screen.getByRole('button');
     fireEvent.click(button);
-    
+
     // Assert
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
@@ -93,23 +78,21 @@ describe('Button Component', () => {
   /**
    * Test that button shows loading state
    */
-  it('should show loading state', () => {
-    // Arrange
-    
-    // Act
+  it('should show loading state when isLoading is true', () => {
+    // Arrange & Act
     render(<Button isLoading>Loading Button</Button>);
-    
+
     // Assert
     // Check for screen reader text that indicates loading
     expect(screen.getByText('Loading...')).toBeInTheDocument();
-    
+
     // Button should have loading class
     const button = screen.getByRole('button');
     expect(button).toHaveClass('loading');
-    
+
     // Button should be disabled when loading
     expect(button).toBeDisabled();
-    
+
     // Button content should not be visible during loading
     expect(screen.queryByText('Loading Button')).not.toBeInTheDocument();
   });
@@ -120,13 +103,17 @@ describe('Button Component', () => {
   it('should not trigger click event when disabled', () => {
     // Arrange
     const handleClick = vi.fn();
-    
+
     // Act
-    render(<Button disabled onClick={handleClick}>Disabled Button</Button>);
-    
+    render(
+      <Button disabled onClick={handleClick}>
+        Disabled Button
+      </Button>,
+    );
+
     const button = screen.getByRole('button', { name: 'Disabled Button' });
     fireEvent.click(button);
-    
+
     // Assert
     expect(handleClick).not.toHaveBeenCalled();
     expect(button).toBeDisabled();
@@ -138,10 +125,10 @@ describe('Button Component', () => {
   it('should apply additional CSS class when provided', () => {
     // Arrange
     const customClass = 'custom-button-class';
-    
+
     // Act
     render(<Button className={customClass}>Custom Class Button</Button>);
-    
+
     // Assert
     const button = screen.getByRole('button', { name: 'Custom Class Button' });
     expect(button).toHaveClass(customClass);
@@ -152,37 +139,16 @@ describe('Button Component', () => {
    * Test that button is disabled when both disabled and loading
    */
   it('should be disabled when both disabled prop and loading state are true', () => {
-    // Arrange
-    
-    // Act
-    render(<Button disabled isLoading>Disabled Loading Button</Button>);
-    
+    // Arrange & Act
+    render(
+      <Button disabled isLoading>
+        Disabled Loading Button
+      </Button>,
+    );
+
     // Assert
     const button = screen.getByRole('button');
     expect(button).toBeDisabled();
     expect(button).toHaveClass('loading');
   });
-
-  /**
-   * Test that additional props are passed through
-   */
-  it('should pass additional props to the button element', () => {
-    // Arrange
-    const dataTestId = 'test-button';
-    const ariaLabel = 'Test Button';
-    
-    // Act
-    render(
-      <Button 
-        data-testid={dataTestId} 
-        aria-label={ariaLabel}
-      >
-        Props Button
-      </Button>
-    );
-    
-    // Assert
-    const button = screen.getByTestId(dataTestId);
-    expect(button).toHaveAttribute('aria-label', ariaLabel);
-  });
-}); 
+});

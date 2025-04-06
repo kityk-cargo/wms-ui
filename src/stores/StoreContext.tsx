@@ -14,9 +14,7 @@ interface StoreProviderProps {
  */
 export const StoreProvider: React.FC<StoreProviderProps> = ({ children }) => {
   return (
-    <StoreContext.Provider value={rootStore}>
-      {children}
-    </StoreContext.Provider>
+    <StoreContext.Provider value={rootStore}>{children}</StoreContext.Provider>
   );
 };
 
@@ -53,4 +51,4 @@ export const useOrderStore = () => {
 export const useProductStore = () => {
   const { productStore } = useStore();
   return productStore;
-}; 
+};

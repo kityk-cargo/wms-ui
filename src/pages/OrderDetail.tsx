@@ -12,13 +12,13 @@ import './OrderDetail.css';
 export const OrderDetail = observer(() => {
   const { id } = useParams<{ id: string }>();
   const orderStore = useOrderStore();
-  
+
   useEffect(() => {
     // Load order when component mounts or id changes
     if (id) {
       orderStore.loadOrder(Number(id));
     }
-    
+
     // Reset store when component unmounts
     return () => {
       orderStore.reset();

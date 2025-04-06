@@ -9,7 +9,13 @@ import {
   afterEach,
   vi,
 } from 'vitest';
-import { fetchOrders, fetchOrder, createOrder, updateOrder, deleteOrder } from '../api';
+import {
+  fetchOrders,
+  fetchOrder,
+  createOrder,
+  updateOrder,
+  deleteOrder,
+} from '../api';
 import { OrderCreate } from '../../types';
 import * as path from 'path';
 
@@ -205,7 +211,13 @@ describe('Orders API Pact with Matchers', () => {
       const orderUpdateData = {
         id: orderId,
         customerId: 1,
-        status: 'Processing' as 'Pending' | 'Allocated' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled',
+        status: 'Processing' as
+          | 'Pending'
+          | 'Allocated'
+          | 'Processing'
+          | 'Shipped'
+          | 'Delivered'
+          | 'Cancelled',
         orderDate: '2023-04-01T10:00:00Z',
         totalAmount: 149.99,
         items: [
@@ -240,8 +252,9 @@ describe('Orders API Pact with Matchers', () => {
           body: {
             ...orderSchema,
             status: Matchers.term({
-              generate: 'Processing', 
-              matcher: 'Pending|Allocated|Processing|Shipped|Delivered|Cancelled'
+              generate: 'Processing',
+              matcher:
+                'Pending|Allocated|Processing|Shipped|Delivered|Cancelled',
             }),
           },
         },
@@ -282,4 +295,4 @@ describe('Orders API Pact with Matchers', () => {
       expect(true).toBe(true);
     });
   });
-}); 
+});

@@ -116,7 +116,9 @@ describe('Product Single Operations API Pact', () => {
       });
 
       // Act & Assert - Expect the request to throw an error
-      await expect(fetchProduct(nonExistentProductId)).rejects.toThrow('API error: 404');
+      await expect(fetchProduct(nonExistentProductId)).rejects.toThrow(
+        'API error: 404',
+      );
     });
   });
-}); 
+});

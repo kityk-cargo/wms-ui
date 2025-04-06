@@ -8,7 +8,7 @@ import './ThemeToggle.css';
  */
 export const ThemeToggle = observer(() => {
   const themeStore = useThemeStore();
-  
+
   // Apply theme when component mounts
   useEffect(() => {
     // The theme is already applied in the ThemeStore constructor

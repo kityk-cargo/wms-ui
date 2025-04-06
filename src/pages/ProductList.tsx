@@ -10,11 +10,11 @@ import './ProductList.css';
  */
 export const ProductList = observer(() => {
   const productStore = useProductStore();
-  
+
   useEffect(() => {
     // Load products when component mounts
     productStore.loadProducts();
-    
+
     // Reset store when component unmounts
     return () => {
       productStore.reset();

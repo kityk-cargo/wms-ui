@@ -17,7 +17,7 @@ export interface Product {
  */
 export class ApiError extends Error {
   status: number;
-  
+
   constructor(message: string, status: number) {
     super(message);
     this.name = 'ApiError';
@@ -30,21 +30,21 @@ export class ApiError extends Error {
  */
 async function apiRequest<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<T> {
   try {
     if (!config.apiUrl) {
-      console.error('API URL is not configured. Please check your environment variables.');
+      console.error(
+        'API URL is not configured. Please check your environment variables.',
+      );
       throw new Error('API URL is not configured');
     }
 
     const url = `${config.apiUrl}${endpoint}`;
-    
+
     // Only pass options to fetch if they're not empty
     const hasOptions = Object.keys(options).length > 0;
-    const response = hasOptions 
-      ? await fetch(url, options)
-      : await fetch(url);
+    const response = hasOptions ? await fetch(url, options) : await fetch(url);
 
     if (!response.ok) {
       throw new ApiError(`API error: ${response.status}`, response.status);
@@ -61,7 +61,7 @@ async function apiRequest<T>(
     if (error instanceof ApiError) {
       throw error;
     }
-    
+
     console.error(`Error in API request to ${endpoint}:`, error);
     throw error;
   }
@@ -118,7 +118,7 @@ export async function fetchOrder(id: number): Promise<Order> {
 export async function createOrder(orderData: OrderCreate): Promise<Order> {
   return apiRequest<Order>(
     '/api/v1/orders',
-    createJsonRequestOptions('POST', orderData)
+    createJsonRequestOptions('POST', orderData),
   );
 }
 
@@ -127,11 +127,11 @@ export async function createOrder(orderData: OrderCreate): Promise<Order> {
  */
 export async function updateOrder(
   id: number,
-  orderData: Order
+  orderData: Order,
 ): Promise<Order> {
   return apiRequest<Order>(
     `/api/v1/orders/${id}`,
-    createJsonRequestOptions('PUT', orderData)
+    createJsonRequestOptions('PUT', orderData),
   );
 }
 
@@ -139,8 +139,5 @@ export async function updateOrder(
  * Deletes an order
  */
 export async function deleteOrder(id: number): Promise<void> {
-  await apiRequest<void>(
-    `/api/v1/orders/${id}`,
-    { method: 'DELETE' }
-  );
+  await apiRequest<void>(`/api/v1/orders/${id}`, { method: 'DELETE' });
 }

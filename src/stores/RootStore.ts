@@ -19,4 +19,4 @@ export class RootStore {
 }
 
 // Create a singleton instance of the root store
-export const rootStore = new RootStore(); 
+export const rootStore = new RootStore();

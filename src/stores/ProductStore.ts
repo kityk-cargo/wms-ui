@@ -11,16 +11,16 @@ export class ProductStore {
   currentProduct: Product | null = null;
   loading: boolean = false;
   error: string | null = null;
-  
+
   // Root store reference
   rootStore: RootStore;
 
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
-    
+
     // Make all properties observable
     makeAutoObservable(this, {
-      rootStore: false // Do not make the root store reference observable
+      rootStore: false, // Do not make the root store reference observable
     });
   }
 
@@ -30,10 +30,10 @@ export class ProductStore {
   loadProducts = async (): Promise<void> => {
     this.setLoading(true);
     this.setError(null);
-    
+
     try {
       const data = await fetchProducts();
-      
+
       // Use runInAction to batch updates to observable state
       runInAction(() => {
         this.products = data;
@@ -54,10 +54,10 @@ export class ProductStore {
   loadProduct = async (id: number): Promise<void> => {
     this.setLoading(true);
     this.setError(null);
-    
+
     try {
       const data = await fetchProduct(id);
-      
+
       runInAction(() => {
         this.currentProduct = data;
         this.loading = false;
@@ -94,4 +94,4 @@ export class ProductStore {
     this.loading = false;
     this.error = null;
   };
-} 
+}

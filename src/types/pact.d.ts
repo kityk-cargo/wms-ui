@@ -37,7 +37,7 @@ declare module '@pact-foundation/pact' {
     static date(format: string, value?: string): string;
     static timestamp(format: string, value?: string): string;
     static regex(regex: RegExp | string, value: string): string;
-    
+
     // Additional matcher functions
     static string(value: string): string;
     static iso8601DateTime(value?: string): string;

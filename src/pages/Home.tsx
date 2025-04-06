@@ -3,7 +3,7 @@ import './Home.css';
 
 export function Home() {
   return (
-    <div className="home-page">
+    <div className="home-page" data-testid="home-page">
       <div className="hero-section">
         <h1>Welcome to the Warehouse Management System</h1>
         <p>
@@ -19,7 +19,7 @@ export function Home() {
         </div>
       </div>
 
-      <div className="features-section">
+      <div className="features-section" data-testid="features-section">
         <div className="feature-card">
           <h3>Order Management</h3>
           <p>Create, track, and manage customer orders with ease</p>

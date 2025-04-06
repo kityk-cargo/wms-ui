@@ -1,93 +1,89 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { MemoryRouter } from 'react-router-dom';
 import { Home } from './Home';
+import { renderWithRouter } from '../test/test-utils';
 
 /**
  * Tests for the Home page component
- * 
- * These tests verify that the Home page renders correctly:
- * - Displays the welcome message
- * - Shows the feature sections
- * - Provides navigation links
+ *
+ * These tests verify that the Home page:
+ * - Displays the welcome message correctly
+ * - Shows feature sections with appropriate content
+ * - Provides navigation links with correct attributes
  */
 describe('Home Page', () => {
-  /**
-   * Utility function to render the component within a router context
-   */
-  const renderWithRouter = () => {
-    return render(
-      <MemoryRouter>
-        <Home />
-      </MemoryRouter>
-    );
-  };
+  const featureCards = [
+    {
+      title: 'Order Management',
+      description: 'Create, track, and manage customer orders with ease',
+    },
+    {
+      title: 'Inventory Control',
+      description: 'Keep track of your products and stock levels',
+    },
+    {
+      title: 'Warehouse Operations',
+      description: 'Optimize picking, packing, and shipping processes',
+    },
+  ];
+
+  const navigationLinks = [
+    { name: 'Create Order', href: '/orders/create', className: 'btn-primary' },
+    { name: 'View Orders', href: '/orders', className: 'btn-secondary' },
+  ];
 
   /**
    * Test that the page renders the welcome message
    */
   it('should render the welcome message', () => {
     // Arrange & Act
-    renderWithRouter();
-    
+    renderWithRouter(<Home />);
+
     // Assert
-    expect(screen.getByText('Welcome to the Warehouse Management System')).toBeInTheDocument();
     expect(
-      screen.getByText('Manage your inventory, orders, and warehouse operations efficiently')
+      screen.getByText('Welcome to the Warehouse Management System'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Manage your inventory, orders, and warehouse operations efficiently',
+      ),
     ).toBeInTheDocument();
   });
 
   /**
    * Test that the page displays all feature cards
    */
-  it('should display all feature cards', () => {
+  it('should display all feature cards with correct content', () => {
     // Arrange & Act
-    renderWithRouter();
-    
+    renderWithRouter(<Home />);
+
     // Assert
-    expect(screen.getByText('Order Management')).toBeInTheDocument();
-    expect(screen.getByText('Inventory Control')).toBeInTheDocument();
-    expect(screen.getByText('Warehouse Operations')).toBeInTheDocument();
-    
-    // Check that descriptions are also rendered
-    expect(screen.getByText('Create, track, and manage customer orders with ease')).toBeInTheDocument();
-    expect(screen.getByText('Keep track of your products and stock levels')).toBeInTheDocument();
-    expect(screen.getByText('Optimize picking, packing, and shipping processes')).toBeInTheDocument();
+    featureCards.forEach(({ title, description }) => {
+      expect(screen.getByText(title)).toBeInTheDocument();
+      expect(screen.getByText(description)).toBeInTheDocument();
+
+      // Verify each title is within a feature card
+      const card = screen.getByText(title).closest('.feature-card');
+      expect(card).toBeInTheDocument();
+    });
   });
 
   /**
-   * Test that the page contains navigation links
+   * Test that the page contains navigation links with correct attributes
    */
-  it('should contain navigation links with correct URLs', () => {
+  it('should contain navigation links with correct URLs and styling', () => {
     // Arrange & Act
-    renderWithRouter();
-    
-    // Assert
-    const createOrderLink = screen.getByRole('link', { name: 'Create Order' });
-    expect(createOrderLink).toBeInTheDocument();
-    expect(createOrderLink).toHaveAttribute('href', '/orders/create');
-    
-    const viewOrdersLink = screen.getByRole('link', { name: 'View Orders' });
-    expect(viewOrdersLink).toBeInTheDocument();
-    expect(viewOrdersLink).toHaveAttribute('href', '/orders');
-  });
+    renderWithRouter(<Home />);
 
-  /**
-   * Test that the navigation links have the correct styling
-   */
-  it('should style navigation links correctly', () => {
-    // Arrange & Act
-    renderWithRouter();
-    
     // Assert
-    const createOrderLink = screen.getByRole('link', { name: 'Create Order' });
-    expect(createOrderLink).toHaveClass('btn');
-    expect(createOrderLink).toHaveClass('btn-primary');
-    
-    const viewOrdersLink = screen.getByRole('link', { name: 'View Orders' });
-    expect(viewOrdersLink).toHaveClass('btn');
-    expect(viewOrdersLink).toHaveClass('btn-secondary');
+    navigationLinks.forEach(({ name, href, className }) => {
+      const link = screen.getByRole('link', { name });
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute('href', href);
+      expect(link).toHaveClass('btn');
+      expect(link).toHaveClass(className);
+    });
   });
 
   /**
@@ -95,26 +91,34 @@ describe('Home Page', () => {
    */
   it('should have the correct page structure with hero and features sections', () => {
     // Arrange & Act
-    renderWithRouter();
-    
+    renderWithRouter(<Home />);
+
     // Assert
-    const homePage = screen.getByText('Welcome to the Warehouse Management System').closest('.home-page');
+    // Check main page container
+    const homePage =
+      screen.getByTestId('home-page') ||
+      screen
+        .getByText('Welcome to the Warehouse Management System')
+        .closest('.home-page');
     expect(homePage).toBeInTheDocument();
-    
-    // Check that the page has the main sections
-    const heroSection = screen.getByText('Welcome to the Warehouse Management System').closest('.hero-section');
+
+    // Check main sections
+    const heroSection = screen
+      .getByText('Welcome to the Warehouse Management System')
+      .closest('.hero-section');
     expect(heroSection).toBeInTheDocument();
-    
-    const featuresSection = screen.getByText('Order Management').closest('.features-section');
+
+    const featuresSection =
+      screen.getByTestId('features-section') ||
+      screen.getByText('Order Management').closest('.features-section');
     expect(featuresSection).toBeInTheDocument();
-    
-    // Directly test for the existence of three feature cards with their specific titles
-    const orderManagementCard = screen.getByText('Order Management').closest('.feature-card');
-    const inventoryControlCard = screen.getByText('Inventory Control').closest('.feature-card');
-    const warehouseOperationsCard = screen.getByText('Warehouse Operations').closest('.feature-card');
-    
-    expect(orderManagementCard).toBeInTheDocument();
-    expect(inventoryControlCard).toBeInTheDocument();
-    expect(warehouseOperationsCard).toBeInTheDocument();
+
+    // Check that all feature cards are children of the features section
+    featureCards.forEach(({ title }) => {
+      const card = screen
+        .getByText(title)
+        .closest('.feature-card') as HTMLElement;
+      expect(featuresSection).toContainElement(card);
+    });
   });
-}); 
+});

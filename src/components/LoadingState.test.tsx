@@ -5,27 +5,29 @@ import { LoadingState } from './LoadingState';
 
 /**
  * Tests for the LoadingState component
- * 
+ *
  * These tests verify that the LoadingState component:
- * - Renders with default loading message
- * - Accepts and displays custom loading messages
- * - Has appropriate styling and structure
+ * - Renders with default or custom loading message
+ * - Contains appropriate elements (spinner and message)
+ * - Applies correct styling
  */
 describe('LoadingState Component', () => {
   /**
    * Test that component renders with default loading message
    */
   it('should render with default loading message', () => {
-    // Arrange
-    
-    // Act
+    // Arrange & Act
     render(<LoadingState />);
-    
+
     // Assert
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
-    const container = screen.getByText('Loading...').closest('.loading-container');
+    const container = screen.getByTestId('loading-container');
     expect(container).toBeInTheDocument();
-    expect(container).toContainElement(screen.getByText('Loading...'));
+    expect(container).toHaveClass('loading-container');
+
+    const message = screen.getByText('Loading...');
+    expect(message).toBeInTheDocument();
+    expect(message).toHaveClass('loading-message');
+    expect(message.tagName).toBe('P');
   });
 
   /**
@@ -34,48 +36,29 @@ describe('LoadingState Component', () => {
   it('should render with custom loading message', () => {
     // Arrange
     const customMessage = 'Fetching data...';
-    
+
     // Act
     render(<LoadingState message={customMessage} />);
-    
+
     // Assert
     expect(screen.getByText(customMessage)).toBeInTheDocument();
     expect(screen.queryByText('Loading...')).not.toBeInTheDocument(); // Default message should not appear
   });
 
   /**
-   * Test that component renders the spinner
+   * Test that component has the correct structure with spinner and message
    */
-  it('should render a loading spinner', () => {
-    // Arrange
-    
-    // Act
+  it('should have correct structure with spinner and message elements', () => {
+    // Arrange & Act
     render(<LoadingState />);
-    
-    // Assert
-    // Look for the spinner within the container
-    const container = screen.getByText('Loading...').closest('.loading-container');
-    const spinner = container?.querySelector('.loading-spinner');
-    expect(spinner).toBeInTheDocument();
-  });
 
-  /**
-   * Test that component has correct structure with message and spinner
-   */
-  it('should have correct structure with container, spinner, and message', () => {
-    // Arrange
-    
-    // Act
-    render(<LoadingState />);
-    
     // Assert
-    const container = screen.getByText('Loading...').closest('.loading-container');
-    expect(container).toBeInTheDocument();
-    
-    // Check that the container has both elements
-    const spinner = container?.querySelector('.loading-spinner');
-    const message = container?.querySelector('.loading-message');
-    
+    const container = screen.getByTestId('loading-container');
+
+    // Check for both spinner and message elements
+    const spinner = container.querySelector('.loading-spinner');
+    const message = container.querySelector('.loading-message');
+
     expect(spinner).toBeInTheDocument();
     expect(message).toBeInTheDocument();
     expect(message).toHaveTextContent('Loading...');
@@ -84,32 +67,15 @@ describe('LoadingState Component', () => {
   /**
    * Test that component handles empty message
    */
-  it('should handle empty message gracefully', () => {
-    // Arrange
-    
-    // Act
+  it('should handle empty message by rendering an empty paragraph', () => {
+    // Arrange & Act
     render(<LoadingState message="" />);
-    
-    // Assert
-    // Find the container by looking for the empty message element
-    const container = screen.getByTestId('loading-container') || document.querySelector('.loading-container');
-    const message = container?.querySelector('.loading-message');
-    expect(message).toBeInTheDocument();
-    expect(message).toHaveTextContent(''); // Empty but exists
-  });
 
-  /**
-   * Test that message is displayed within a paragraph element
-   */
-  it('should display message within a paragraph element', () => {
-    // Arrange
-    
-    // Act
-    render(<LoadingState />);
-    
     // Assert
-    const message = screen.getByText('Loading...');
-    expect(message.tagName).toBe('P');
-    expect(message).toHaveClass('loading-message');
+    const container = screen.getByTestId('loading-container');
+    const message = container.querySelector('.loading-message');
+
+    expect(message).toBeInTheDocument();
+    expect(message?.textContent).toBe('');
   });
-}); 
+});

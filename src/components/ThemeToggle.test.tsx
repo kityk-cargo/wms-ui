@@ -7,7 +7,7 @@ import { rootStore } from '../stores/RootStore';
 
 /**
  * Tests for the ThemeToggle component
- * 
+ *
  * These tests verify that the theme toggle functionality works as expected
  * focusing on user interactions and theme switching behavior
  */
@@ -30,7 +30,7 @@ describe('ThemeToggle Component', () => {
     Object.defineProperty(window, 'localStorage', {
       value: localStorageMock,
     });
-    
+
     // Setup matchMedia mock
     Object.defineProperty(window, 'matchMedia', {
       value: matchMediaMock.mockImplementation((query) => ({
@@ -42,10 +42,10 @@ describe('ThemeToggle Component', () => {
         dispatchEvent: vi.fn(),
       })),
     });
-    
+
     // Reset mocks between tests
     vi.clearAllMocks();
-    
+
     // Reset theme store state
     rootStore.themeStore.theme = 'system';
     rootStore.themeStore.isExpanded = false;
@@ -63,15 +63,15 @@ describe('ThemeToggle Component', () => {
     render(
       <StoreProvider>
         <ThemeToggle />
-      </StoreProvider>
+      </StoreProvider>,
     );
-    
+
     // Act - no action needed, testing initial render
-    
+
     // Assert
     expect(screen.getByLabelText('Open theme settings')).toBeInTheDocument();
     expect(screen.getByText('Theme')).toBeInTheDocument();
-    
+
     // Should not show theme options in collapsed state
     expect(screen.queryByText('Light')).not.toBeInTheDocument();
     expect(screen.queryByText('Dark')).not.toBeInTheDocument();
@@ -86,12 +86,12 @@ describe('ThemeToggle Component', () => {
     render(
       <StoreProvider>
         <ThemeToggle />
-      </StoreProvider>
+      </StoreProvider>,
     );
-    
+
     // Act
     fireEvent.click(screen.getByLabelText('Open theme settings'));
-    
+
     // Assert
     expect(screen.getByText('Light')).toBeInTheDocument();
     expect(screen.getByText('Dark')).toBeInTheDocument();
@@ -107,17 +107,17 @@ describe('ThemeToggle Component', () => {
     render(
       <StoreProvider>
         <ThemeToggle />
-      </StoreProvider>
+      </StoreProvider>,
     );
-    
+
     // Act
     fireEvent.click(screen.getByLabelText('Open theme settings'));
     fireEvent.click(screen.getByLabelText('Switch to light mode'));
-    
+
     // Assert
     expect(rootStore.themeStore.theme).toBe('light');
     expect(localStorageMock.setItem).toHaveBeenCalledWith('theme', 'light');
-    
+
     // Should collapse after selection
     expect(rootStore.themeStore.isExpanded).toBe(false);
     expect(screen.queryByText('Light')).not.toBeInTheDocument();
@@ -131,17 +131,17 @@ describe('ThemeToggle Component', () => {
     render(
       <StoreProvider>
         <ThemeToggle />
-      </StoreProvider>
+      </StoreProvider>,
     );
-    
+
     // Act
     fireEvent.click(screen.getByLabelText('Open theme settings'));
     fireEvent.click(screen.getByLabelText('Switch to dark mode'));
-    
+
     // Assert
     expect(rootStore.themeStore.theme).toBe('dark');
     expect(localStorageMock.setItem).toHaveBeenCalledWith('theme', 'dark');
-    
+
     // Should collapse after selection
     expect(rootStore.themeStore.isExpanded).toBe(false);
   });
@@ -154,17 +154,17 @@ describe('ThemeToggle Component', () => {
     render(
       <StoreProvider>
         <ThemeToggle />
-      </StoreProvider>
+      </StoreProvider>,
     );
-    
+
     // Act
     fireEvent.click(screen.getByLabelText('Open theme settings'));
     fireEvent.click(screen.getByLabelText('Use system theme preference'));
-    
+
     // Assert
     expect(rootStore.themeStore.theme).toBe('system');
     expect(localStorageMock.setItem).toHaveBeenCalledWith('theme', 'system');
-    
+
     // Should collapse after selection
     expect(rootStore.themeStore.isExpanded).toBe(false);
   });
@@ -177,19 +177,19 @@ describe('ThemeToggle Component', () => {
     render(
       <StoreProvider>
         <ThemeToggle />
-      </StoreProvider>
+      </StoreProvider>,
     );
-    
+
     // Act
     fireEvent.click(screen.getByLabelText('Open theme settings'));
     fireEvent.click(screen.getByLabelText('Close theme settings'));
-    
+
     // Assert
     expect(rootStore.themeStore.isExpanded).toBe(false);
     expect(screen.queryByText('Light')).not.toBeInTheDocument();
     expect(screen.queryByText('Dark')).not.toBeInTheDocument();
     expect(screen.queryByText('System')).not.toBeInTheDocument();
-    
+
     // Toggle button should be visible again
     expect(screen.getByLabelText('Open theme settings')).toBeInTheDocument();
   });
@@ -200,25 +200,25 @@ describe('ThemeToggle Component', () => {
   it('should mark the current theme as active in the expanded view', () => {
     // Arrange
     rootStore.themeStore.theme = 'dark';
-    
+
     render(
       <StoreProvider>
         <ThemeToggle />
-      </StoreProvider>
+      </StoreProvider>,
     );
-    
+
     // Act
     fireEvent.click(screen.getByLabelText('Open theme settings'));
-    
+
     // Assert - check for active class on dark mode button
     const darkButton = screen.getByLabelText('Switch to dark mode');
     expect(darkButton.classList.contains('active')).toBe(true);
-    
+
     // Light and system buttons should not have active class
     const lightButton = screen.getByLabelText('Switch to light mode');
     const systemButton = screen.getByLabelText('Use system theme preference');
-    
+
     expect(lightButton.classList.contains('active')).toBe(false);
     expect(systemButton.classList.contains('active')).toBe(false);
   });
-}); 
+});

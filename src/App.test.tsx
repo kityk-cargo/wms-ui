@@ -8,7 +8,7 @@ beforeEach(() => {
   // Setup mock matchMedia
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
-    value: vi.fn().mockImplementation(query => ({
+    value: vi.fn().mockImplementation((query) => ({
       matches: false,
       media: query,
       onchange: null,
@@ -19,7 +19,7 @@ beforeEach(() => {
       dispatchEvent: vi.fn(),
     })),
   });
-  
+
   // Mock localStorage
   const localStorageMock = {
     getItem: vi.fn().mockReturnValue(null),
@@ -29,7 +29,7 @@ beforeEach(() => {
     key: vi.fn(),
     length: 0,
   };
-  
+
   Object.defineProperty(window, 'localStorage', {
     value: localStorageMock,
   });

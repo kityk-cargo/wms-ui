@@ -6,7 +6,7 @@ import * as apiService from '../services/api';
 
 /**
  * Tests for the ProductList component
- * 
+ *
  * These tests verify the ProductList component's functionality:
  * - Fetching and displaying products
  * - Loading state
@@ -51,12 +51,12 @@ describe('ProductList Component', () => {
     // Arrange
     // Create a promise that won't resolve during the test
     vi.spyOn(apiService, 'fetchProducts').mockImplementation(
-      () => new Promise(() => {})
+      () => new Promise(() => {}),
     );
-    
+
     // Act
     render(<ProductList />);
-    
+
     // Assert
     expect(screen.getByText('Loading products...')).toBeInTheDocument();
   });
@@ -67,15 +67,15 @@ describe('ProductList Component', () => {
   it('should display products when fetch is successful', async () => {
     // Arrange
     vi.spyOn(apiService, 'fetchProducts').mockResolvedValue(mockProducts);
-    
+
     // Act
     render(<ProductList />);
-    
+
     // Assert - wait for products to load
     await waitFor(() => {
       expect(screen.getByText('Products')).toBeInTheDocument();
     });
-    
+
     // Verify products are displayed
     expect(screen.getByText('Test Product 1')).toBeInTheDocument();
     expect(screen.getByText('Test Product 2')).toBeInTheDocument();
@@ -84,7 +84,7 @@ describe('ProductList Component', () => {
     expect(screen.getByText('Test Category A')).toBeInTheDocument();
     expect(screen.getByText('Test Category B')).toBeInTheDocument();
     expect(screen.getByText('This is test product 1')).toBeInTheDocument();
-    
+
     // Verify the dates are formatted correctly
     expect(screen.getAllByText(/Created:/)).toHaveLength(2);
     expect(screen.getAllByText(/Updated:/)).toHaveLength(2);
@@ -96,10 +96,10 @@ describe('ProductList Component', () => {
   it('should display "No products found" when product array is empty', async () => {
     // Arrange
     vi.spyOn(apiService, 'fetchProducts').mockResolvedValue([]);
-    
+
     // Act
     render(<ProductList />);
-    
+
     // Assert
     await waitFor(() => {
       expect(screen.getByText('No products found')).toBeInTheDocument();
@@ -112,15 +112,17 @@ describe('ProductList Component', () => {
   it('should display error message when fetch fails', async () => {
     // Arrange
     vi.spyOn(apiService, 'fetchProducts').mockRejectedValue(
-      new Error('Network error')
+      new Error('Network error'),
     );
-    
+
     // Act
     render(<ProductList />);
-    
+
     // Assert
     await waitFor(() => {
-      expect(screen.getByText('Failed to fetch products. Please try again later.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Failed to fetch products. Please try again later.'),
+      ).toBeInTheDocument();
     });
   });
 
@@ -131,13 +133,15 @@ describe('ProductList Component', () => {
     // Arrange
     const apiError = new apiService.ApiError('API error', 500);
     vi.spyOn(apiService, 'fetchProducts').mockRejectedValue(apiError);
-    
+
     // Act
     render(<ProductList />);
-    
+
     // Assert
     await waitFor(() => {
-      expect(screen.getByText('Failed to fetch products. Please try again later.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Failed to fetch products. Please try again later.'),
+      ).toBeInTheDocument();
     });
   });
 
@@ -146,16 +150,18 @@ describe('ProductList Component', () => {
    */
   it('should call fetchProducts exactly once on mount', async () => {
     // Arrange
-    const fetchProductsSpy = vi.spyOn(apiService, 'fetchProducts').mockResolvedValue(mockProducts);
-    
+    const fetchProductsSpy = vi
+      .spyOn(apiService, 'fetchProducts')
+      .mockResolvedValue(mockProducts);
+
     // Act
     render(<ProductList />);
-    
+
     // Assert
     await waitFor(() => {
       expect(screen.getByText('Products')).toBeInTheDocument();
     });
-    
+
     expect(fetchProductsSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -165,17 +171,19 @@ describe('ProductList Component', () => {
   it('should correctly render product without description field', async () => {
     // Arrange
     vi.spyOn(apiService, 'fetchProducts').mockResolvedValue([mockProducts[1]]);
-    
+
     // Act
     render(<ProductList />);
-    
+
     // Assert
     await waitFor(() => {
       expect(screen.getByText('Test Product 2')).toBeInTheDocument();
     });
-    
+
     // Verify the optional description is not rendered
-    expect(screen.queryByText('This is test product 1')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('This is test product 1'),
+    ).not.toBeInTheDocument();
   });
 
   /**
@@ -188,20 +196,20 @@ describe('ProductList Component', () => {
       ...mockProducts[0],
       created_at: '2023-04-15T14:30:45Z',
     };
-    
+
     vi.spyOn(apiService, 'fetchProducts').mockResolvedValue([fixedDateProduct]);
-    
+
     // Act
     render(<ProductList />);
-    
+
     // Assert
     await waitFor(() => {
       expect(screen.getByText('Test Product 1')).toBeInTheDocument();
     });
-    
+
     // Check that the date is formatted as expected
     // This will depend on the locale of the test environment
     // Using a partial match to avoid locale issues in testing environments
     expect(screen.getByText(/4\/15\/2023/)).toBeInTheDocument();
   });
-}); 
+});

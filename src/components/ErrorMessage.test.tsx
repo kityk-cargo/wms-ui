@@ -5,7 +5,7 @@ import { ErrorMessage } from './ErrorMessage';
 
 /**
  * Tests for the ErrorMessage component
- * 
+ *
  * These tests verify that the ErrorMessage component:
  * - Renders with the provided error message
  * - Has appropriate styling and structure
@@ -13,105 +13,71 @@ import { ErrorMessage } from './ErrorMessage';
  */
 describe('ErrorMessage Component', () => {
   /**
+   * Set up test cases with different error messages
+   */
+  const testCases = [
+    { name: 'basic error', message: 'Something went wrong!' },
+    { name: 'empty message', message: '' },
+    {
+      name: 'long message',
+      message:
+        'This is a very long error message that might potentially overflow the container or wrap to multiple lines depending on the styling. It should still be displayed correctly and maintain readability for the user.',
+    },
+  ];
+
+  /**
    * Test that component renders with the provided error message
    */
-  it('should render with the provided error message', () => {
-    // Arrange
-    const errorMessage = 'Something went wrong!';
-    
-    // Act
-    render(<ErrorMessage message={errorMessage} />);
-    
+  it.each(testCases)('should render with $name', ({ message }) => {
+    // Arrange & Act
+    render(<ErrorMessage message={message} />);
+
     // Assert
-    expect(screen.getByText(errorMessage)).toBeInTheDocument();
+    const container = screen.getByTestId('error-container');
+    expect(container).toBeInTheDocument();
+    expect(container).toHaveClass('error-container');
+
+    if (message) {
+      expect(screen.getByText(message)).toBeInTheDocument();
+    }
   });
 
   /**
    * Test that component contains an error icon
    */
   it('should display an error icon', () => {
-    // Arrange
-    
-    // Act
+    // Arrange & Act
     render(<ErrorMessage message="Error" />);
-    
+
     // Assert
-    const container = screen.getByText('Error').closest('.error-container');
-    const errorIcon = container?.querySelector('.error-icon');
+    const container = screen.getByTestId('error-container');
+    const errorIcon = container.querySelector('.error-icon');
+
     expect(errorIcon).toBeInTheDocument();
     expect(errorIcon).toHaveTextContent('!'); // The icon is an exclamation mark
+    expect(errorIcon).toHaveClass('error-icon');
   });
 
   /**
-   * Test that component has correct structure
+   * Test that component has correct structure with icon and message
    */
-  it('should have correct structure with container, icon, and message', () => {
+  it('should have correct structure with icon and message elements', () => {
     // Arrange
     const testMessage = 'Test error message';
-    
+
     // Act
     render(<ErrorMessage message={testMessage} />);
-    
+
     // Assert
-    const container = screen.getByText(testMessage).closest('.error-container');
-    expect(container).toBeInTheDocument();
-    
-    // Check that the container has both elements
-    const icon = container?.querySelector('.error-icon');
-    const message = container?.querySelector('.error-message');
-    
+    const container = screen.getByTestId('error-container');
+
+    // Check for both icon and message elements
+    const icon = container.querySelector('.error-icon');
+    const message = container.querySelector('.error-message');
+
     expect(icon).toBeInTheDocument();
     expect(message).toBeInTheDocument();
     expect(message).toHaveTextContent(testMessage);
+    expect(message?.tagName).toBe('P');
   });
-
-  /**
-   * Test that message is displayed within a paragraph element
-   */
-  it('should display message within a paragraph element', () => {
-    // Arrange
-    const testMessage = 'Test paragraph error';
-    
-    // Act
-    render(<ErrorMessage message={testMessage} />);
-    
-    // Assert
-    const message = screen.getByText(testMessage);
-    expect(message.tagName).toBe('P');
-    expect(message).toHaveClass('error-message');
-  });
-
-  /**
-   * Test that component handles long error messages
-   */
-  it('should handle long error messages', () => {
-    // Arrange
-    const longErrorMessage = 'This is a very long error message that might potentially overflow the container or wrap to multiple lines depending on the styling. It should still be displayed correctly and maintain readability for the user.';
-    
-    // Act
-    render(<ErrorMessage message={longErrorMessage} />);
-    
-    // Assert
-    expect(screen.getByText(longErrorMessage)).toBeInTheDocument();
-  });
-
-  /**
-   * Test that component applies correct CSS classes
-   */
-  it('should apply correct CSS classes', () => {
-    // Arrange
-    
-    // Act
-    render(<ErrorMessage message="CSS test" />);
-    
-    // Assert
-    const container = screen.getByText('CSS test').closest('.error-container');
-    expect(container).toHaveClass('error-container');
-    
-    const icon = container?.querySelector('.error-icon');
-    expect(icon).toHaveClass('error-icon');
-    
-    const message = screen.getByText('CSS test');
-    expect(message).toHaveClass('error-message');
-  });
-}); 
+});

@@ -71,7 +71,9 @@ describe('Orders API Error Scenarios Pact', () => {
       });
 
       // Act & Assert - Expect the request to throw an error
-      await expect(fetchOrder(nonExistentOrderId)).rejects.toThrow('API error: 404');
+      await expect(fetchOrder(nonExistentOrderId)).rejects.toThrow(
+        'API error: 404',
+      );
     });
   });
 
@@ -111,7 +113,9 @@ describe('Orders API Error Scenarios Pact', () => {
       });
 
       // Act & Assert - Expect the request to throw an error
-      await expect(createOrder(invalidOrderData)).rejects.toThrow('API error: 400');
+      await expect(createOrder(invalidOrderData)).rejects.toThrow(
+        'API error: 400',
+      );
     });
   });
 
@@ -153,7 +157,9 @@ describe('Orders API Error Scenarios Pact', () => {
       });
 
       // Act & Assert - Expect the request to throw an error
-      await expect(createOrder(orderWithNonExistentProduct)).rejects.toThrow('API error: 404');
+      await expect(createOrder(orderWithNonExistentProduct)).rejects.toThrow(
+        'API error: 404',
+      );
     });
   });
 
@@ -180,9 +186,9 @@ describe('Orders API Error Scenarios Pact', () => {
 
       // We're testing the fetchOrders function but using the import alias to avoid conflicts
       const { fetchOrders } = await import('../api');
-      
+
       // Act & Assert - Expect the request to throw an error
       await expect(fetchOrders()).rejects.toThrow('API error: 500');
     });
   });
-}); 
+});

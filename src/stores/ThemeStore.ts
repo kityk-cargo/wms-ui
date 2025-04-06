@@ -10,31 +10,33 @@ export class ThemeStore {
   // Observable state
   theme: Theme = 'system';
   isExpanded: boolean = false;
-  
+
   // Root store reference
   rootStore: RootStore;
-  
+
   // Media query for system theme detection
   private darkModeMediaQuery: MediaQueryList | null = null;
 
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
-    
+
     // Initialize the theme from localStorage
     this.theme = this.initializeTheme();
-    
+
     // Make all properties observable
     makeAutoObservable(this, {
       rootStore: false, // Do not make the root store reference observable
-      darkModeMediaQuery: false // Do not make media query observable
     });
-    
+
     // Apply the theme immediately
     this.applyTheme();
-    
+
     // Set up system theme change listener
-    if (typeof window !== 'undefined' && window.matchMedia) {
-      this.setupSystemThemeListener();
+    if (typeof window !== 'undefined') {
+      // Check if matchMedia is available as a function
+      if (window.matchMedia && typeof window.matchMedia === 'function') {
+        this.setupSystemThemeListener();
+      }
     }
   }
 
@@ -65,7 +67,7 @@ export class ThemeStore {
    */
   getSystemThemePreference = (): 'light' | 'dark' => {
     if (typeof window === 'undefined' || !window.matchMedia) return 'light';
-    
+
     try {
       return window.matchMedia('(prefers-color-scheme: dark)').matches
         ? 'dark'
@@ -81,13 +83,15 @@ export class ThemeStore {
    */
   private initializeTheme = (): Theme => {
     if (typeof window === 'undefined' || !window.localStorage) return 'system';
-    
+
     try {
       const storedTheme = localStorage.getItem('theme') as Theme | null;
 
       if (
         storedTheme &&
-        (storedTheme === 'light' || storedTheme === 'dark' || storedTheme === 'system')
+        (storedTheme === 'light' ||
+          storedTheme === 'dark' ||
+          storedTheme === 'system')
       ) {
         return storedTheme;
       }
@@ -104,12 +108,11 @@ export class ThemeStore {
    */
   private applyTheme = (): void => {
     if (typeof document === 'undefined') return;
-    
+
     try {
       const root = document.documentElement;
-      const effectiveTheme = this.theme === 'system' 
-        ? this.getSystemThemePreference() 
-        : this.theme;
+      const effectiveTheme =
+        this.theme === 'system' ? this.getSystemThemePreference() : this.theme;
 
       // Remove existing theme classes
       root.classList.remove('light-theme', 'dark-theme');
@@ -132,10 +135,16 @@ export class ThemeStore {
   private setupSystemThemeListener = (): void => {
     // Clean up any existing listeners first
     this.cleanupSystemThemeListener();
-    
-    if (this.theme === 'system' && typeof window !== 'undefined' && window.matchMedia) {
+
+    if (
+      this.theme === 'system' &&
+      typeof window !== 'undefined' &&
+      window.matchMedia
+    ) {
       try {
-        this.darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        this.darkModeMediaQuery = window.matchMedia(
+          '(prefers-color-scheme: dark)',
+        );
 
         // Handler for system theme changes
         const handleThemeChange = (): void => {
@@ -143,9 +152,15 @@ export class ThemeStore {
         };
 
         // Modern browsers
-        if (this.darkModeMediaQuery.addEventListener) {
+        if (
+          this.darkModeMediaQuery &&
+          this.darkModeMediaQuery.addEventListener
+        ) {
           this.darkModeMediaQuery.addEventListener('change', handleThemeChange);
-        } else if (this.darkModeMediaQuery.addListener) {
+        } else if (
+          this.darkModeMediaQuery &&
+          this.darkModeMediaQuery.addListener
+        ) {
           // Legacy support for older browsers
           this.darkModeMediaQuery.addListener(handleThemeChange);
         }
@@ -160,7 +175,7 @@ export class ThemeStore {
    */
   private cleanupSystemThemeListener = (): void => {
     if (!this.darkModeMediaQuery) return;
-    
+
     try {
       // Handler for system theme changes - should match the one in setupSystemThemeListener
       const handleThemeChange = (): void => {
@@ -169,15 +184,18 @@ export class ThemeStore {
 
       // Modern browsers
       if (this.darkModeMediaQuery.removeEventListener) {
-        this.darkModeMediaQuery.removeEventListener('change', handleThemeChange);
+        this.darkModeMediaQuery.removeEventListener(
+          'change',
+          handleThemeChange,
+        );
       } else if (this.darkModeMediaQuery.removeListener) {
         // Legacy support for older browsers
         this.darkModeMediaQuery.removeListener(handleThemeChange);
       }
-      
+
       this.darkModeMediaQuery = null;
     } catch (err) {
       console.error('Error cleaning up system theme listener:', err);
     }
   };
-} 
+}
