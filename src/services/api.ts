@@ -13,124 +13,113 @@ export interface Product {
 }
 
 /**
- * Fetches all products from the API
+ * API Error class for better error handling with HTTP status
  */
-export async function fetchProducts(): Promise<Product[]> {
+export class ApiError extends Error {
+  status: number;
+  
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
+/**
+ * Base API request function with common error handling
+ */
+async function apiRequest<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
   try {
-    // Check if API URL is configured
     if (!config.apiUrl) {
-      console.error(
-        'API URL is not configured. Please check your environment variables.',
-      );
+      console.error('API URL is not configured. Please check your environment variables.');
       throw new Error('API URL is not configured');
     }
 
-    const response = await fetch(`${config.apiUrl}/api/v1/products`);
+    const url = `${config.apiUrl}${endpoint}`;
+    
+    // Only pass options to fetch if they're not empty
+    const hasOptions = Object.keys(options).length > 0;
+    const response = hasOptions 
+      ? await fetch(url, options)
+      : await fetch(url);
 
     if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
+      throw new ApiError(`API error: ${response.status}`, response.status);
     }
 
-    // The API contract requires product IDs to be integers
+    // For DELETE operations that don't return content
+    if (response.status === 204 || options.method === 'DELETE') {
+      return {} as T;
+    }
+
     return await response.json();
   } catch (error) {
-    console.error('Error fetching products:', error);
+    // Preserve ApiError instances but wrap others
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    
+    console.error(`Error in API request to ${endpoint}:`, error);
     throw error;
   }
+}
+
+/**
+ * Creates request options for JSON requests
+ */
+function createJsonRequestOptions(method: string, data?: unknown): RequestInit {
+  return {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: data ? JSON.stringify(data) : undefined,
+  };
+}
+
+// Product Endpoints
+
+/**
+ * Fetches all products from the API
+ */
+export async function fetchProducts(): Promise<Product[]> {
+  return apiRequest<Product[]>('/api/v1/products');
 }
 
 /**
  * Fetches a single product by ID
  */
 export async function fetchProduct(id: number): Promise<Product> {
-  try {
-    if (!config.apiUrl) {
-      throw new Error('API URL is not configured');
-    }
-
-    const response = await fetch(`${config.apiUrl}/api/v1/products/${id}`);
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error(`Error fetching product ${id}:`, error);
-    throw error;
-  }
+  return apiRequest<Product>(`/api/v1/products/${id}`);
 }
+
+// Order Endpoints
 
 /**
  * Fetches all orders from the API
  */
 export async function fetchOrders(): Promise<Order[]> {
-  try {
-    if (!config.apiUrl) {
-      throw new Error('API URL is not configured');
-    }
-
-    const response = await fetch(`${config.apiUrl}/api/v1/orders`);
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching orders:', error);
-    throw error;
-  }
+  return apiRequest<Order[]>('/api/v1/orders');
 }
 
 /**
  * Fetches a single order by ID
  */
 export async function fetchOrder(id: number): Promise<Order> {
-  try {
-    if (!config.apiUrl) {
-      throw new Error('API URL is not configured');
-    }
-
-    const response = await fetch(`${config.apiUrl}/api/v1/orders/${id}`);
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error(`Error fetching order ${id}:`, error);
-    throw error;
-  }
+  return apiRequest<Order>(`/api/v1/orders/${id}`);
 }
 
 /**
  * Creates a new order
  */
 export async function createOrder(orderData: OrderCreate): Promise<Order> {
-  try {
-    if (!config.apiUrl) {
-      throw new Error('API URL is not configured');
-    }
-
-    const response = await fetch(`${config.apiUrl}/api/v1/orders`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(orderData),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Error creating order:', error);
-    throw error;
-  }
+  return apiRequest<Order>(
+    '/api/v1/orders',
+    createJsonRequestOptions('POST', orderData)
+  );
 }
 
 /**
@@ -138,50 +127,20 @@ export async function createOrder(orderData: OrderCreate): Promise<Order> {
  */
 export async function updateOrder(
   id: number,
-  orderData: Order,
+  orderData: Order
 ): Promise<Order> {
-  try {
-    if (!config.apiUrl) {
-      throw new Error('API URL is not configured');
-    }
-
-    const response = await fetch(`${config.apiUrl}/api/v1/orders/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(orderData),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error(`Error updating order ${id}:`, error);
-    throw error;
-  }
+  return apiRequest<Order>(
+    `/api/v1/orders/${id}`,
+    createJsonRequestOptions('PUT', orderData)
+  );
 }
 
 /**
  * Deletes an order
  */
 export async function deleteOrder(id: number): Promise<void> {
-  try {
-    if (!config.apiUrl) {
-      throw new Error('API URL is not configured');
-    }
-
-    const response = await fetch(`${config.apiUrl}/api/v1/orders/${id}`, {
-      method: 'DELETE',
-    });
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
-  } catch (error) {
-    console.error(`Error deleting order ${id}:`, error);
-    throw error;
-  }
+  await apiRequest<void>(
+    `/api/v1/orders/${id}`,
+    { method: 'DELETE' }
+  );
 }
