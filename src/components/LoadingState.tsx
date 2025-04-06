@@ -1,4 +1,3 @@
-import React from 'react';
 import './LoadingState.css';
 
 interface LoadingStateProps {

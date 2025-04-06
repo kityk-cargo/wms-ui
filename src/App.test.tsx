@@ -10,7 +10,7 @@ describe('App', () => {
     // Check for the WMS logo
     const logoElement = screen.getByText('WMS');
     expect(logoElement).toBeInTheDocument();
-    
+
     // Check for navigation links
     expect(screen.getByText('Home')).toBeInTheDocument();
     expect(screen.getByText('Orders')).toBeInTheDocument();
