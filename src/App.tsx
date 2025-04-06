@@ -1,32 +1,25 @@
-import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
-import { ProductList } from './components/ProductList';
+import { MainLayout } from './layouts/MainLayout';
+import { Home } from './pages/Home';
+import { OrderList } from './pages/OrderList';
+import { OrderDetail } from './pages/OrderDetail';
+import { OrderCreate } from './pages/OrderCreate';
+import { ProductList } from './pages/ProductList';
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank" rel="noreferrer">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>WMS - Warehouse Management System</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-      </div>
-
-      {/* Display products from API */}
-      <ProductList />
-    </>
+    <Router>
+      <MainLayout>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/orders" element={<OrderList />} />
+          <Route path="/orders/create" element={<OrderCreate />} />
+          <Route path="/orders/:id" element={<OrderDetail />} />
+          <Route path="/products" element={<ProductList />} />
+        </Routes>
+      </MainLayout>
+    </Router>
   );
 }
 

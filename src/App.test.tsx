@@ -4,13 +4,16 @@ import App from './App';
 import '@testing-library/jest-dom';
 
 describe('App', () => {
-  it('renders the WMS heading', () => {
+  it('renders the WMS logo and navigation', () => {
     render(<App />);
 
-    // Check for the new heading instead of "Vite + React"
-    const headingElement = screen.getByText(
-      /WMS - Warehouse Management System/i,
-    );
-    expect(headingElement).toBeInTheDocument();
+    // Check for the WMS logo
+    const logoElement = screen.getByText('WMS');
+    expect(logoElement).toBeInTheDocument();
+
+    // Check for navigation links
+    expect(screen.getByText('Home')).toBeInTheDocument();
+    expect(screen.getByText('Orders')).toBeInTheDocument();
+    expect(screen.getByText('Products')).toBeInTheDocument();
   });
 });

@@ -1,0 +1,128 @@
+.order-detail-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.order-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-8);
+}
+
+.order-detail-header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  color: var(--text-primary);
+}
+
+.order-reference {
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: 1rem;
+}
+
+.order-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-8);
+  margin-bottom: var(--spacing-8);
+}
+
+.order-detail-card {
+  background-color: var(--bg-surface);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-6);
+}
+
+.order-detail-card h2 {
+  margin-top: 0;
+  margin-bottom: var(--spacing-6);
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: var(--spacing-3);
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-4);
+}
+
+.detail-label {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.total-amount {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.order-items-section {
+  margin-top: var(--spacing-8);
+}
+
+.order-items-section h2 {
+  margin-bottom: var(--spacing-4);
+  font-size: 1.5rem;
+  color: var(--text-primary);
+}
+
+.order-items-table-container {
+  overflow-x: auto;
+  box-shadow: var(--shadow-md);
+  border-radius: var(--border-radius-md);
+}
+
+.order-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-surface);
+}
+
+.order-items-table th,
+.order-items-table td {
+  padding: var(--spacing-4);
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.order-items-table th {
+  background-color: var(--bg-muted);
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.order-items-table tfoot {
+  background-color: var(--bg-muted);
+  font-weight: 600;
+}
+
+.total-label {
+  text-align: right;
+  color: var(--text-primary);
+}
+
+.total-value {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.loading, .error {
+  text-align: center;
+  padding: var(--spacing-8);
+  background-color: var(--bg-surface);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.error {
+  color: var(--danger-dark);
+  background-color: var(--danger-light);
+} 

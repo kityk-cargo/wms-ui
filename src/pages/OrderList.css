@@ -1,0 +1,126 @@
+.order-list-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.order-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-8);
+}
+
+.order-list-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: var(--text-primary);
+}
+
+.order-table-container {
+  overflow-x: auto;
+  box-shadow: var(--shadow-md);
+  border-radius: var(--border-radius-md);
+}
+
+.order-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-surface);
+}
+
+.order-table th,
+.order-table td {
+  padding: var(--spacing-4);
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.order-table th {
+  background-color: var(--bg-muted);
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.order-table tbody tr:hover {
+  background-color: var(--bg-hover);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--border-radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status-pending {
+  background-color: var(--status-pending-bg);
+  color: var(--status-pending-text);
+}
+
+.status-allocated {
+  background-color: var(--status-allocated-bg);
+  color: var(--status-allocated-text);
+}
+
+.status-processing {
+  background-color: var(--status-processing-bg);
+  color: var(--status-processing-text);
+}
+
+.status-shipped {
+  background-color: var(--status-shipped-bg);
+  color: var(--status-shipped-text);
+}
+
+.status-delivered {
+  background-color: var(--status-delivered-bg);
+  color: var(--status-delivered-text);
+}
+
+.status-cancelled {
+  background-color: var(--status-cancelled-bg);
+  color: var(--status-cancelled-text);
+}
+
+.btn-icon {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background-color: var(--primary-light);
+  color: var(--primary);
+  border-radius: var(--border-radius-sm);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.btn-icon:hover {
+  background-color: var(--primary-border);
+}
+
+.no-orders {
+  text-align: center;
+  padding: var(--spacing-12);
+  background-color: var(--bg-surface);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+  color: var(--text-secondary);
+}
+
+.loading, .error {
+  text-align: center;
+  padding: var(--spacing-8);
+  background-color: var(--bg-surface);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.error {
+  color: var(--danger-dark);
+  background-color: var(--danger-light);
+} 

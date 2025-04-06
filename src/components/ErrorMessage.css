@@ -1,0 +1,31 @@
+.error-container {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-6);
+  background-color: var(--danger-light);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--spacing-6);
+}
+
+.error-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: var(--danger);
+  color: var(--text-inverted);
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 1.25rem;
+  margin-right: var(--spacing-4);
+  flex-shrink: 0;
+}
+
+.error-message {
+  color: var(--danger-dark);
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+} 

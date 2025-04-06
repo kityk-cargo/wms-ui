@@ -1,0 +1,114 @@
+.theme-toggle {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  position: relative;
+}
+
+/* Main theme toggle button */
+.theme-toggle-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle-button:hover {
+  background-color: var(--bg-active);
+  border-color: var(--border-color-hover);
+}
+
+.theme-toggle-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Theme options panel */
+.theme-options {
+  display: flex;
+  gap: 0.5rem;
+  background-color: var(--bg-surface);
+  padding: 0.5rem;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+}
+
+/* Theme buttons */
+.theme-btn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  width: auto;
+  height: 36px;
+  padding: 0 0.75rem;
+  border-radius: var(--border-radius-sm);
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.theme-btn:hover {
+  background-color: var(--bg-active);
+  border-color: var(--border-color-hover);
+  transform: translateY(-2px);
+}
+
+.theme-btn.active {
+  color: var(--primary);
+  background-color: var(--primary-light);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary-border);
+}
+
+.theme-btn-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.theme-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--border-radius-sm);
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+}
+
+.theme-close-btn:hover {
+  background-color: var(--bg-active);
+}
+
+/* Improve icon visibility in dark mode */
+.dark-theme .theme-toggle-button,
+.dark-theme .theme-btn,
+.dark-theme .theme-close-btn {
+  color: var(--text-primary);
+  border-color: var(--border-color-hover);
+}
+
+.dark-theme .theme-toggle-button:hover,
+.dark-theme .theme-btn:hover,
+.dark-theme .theme-close-btn:hover {
+  background-color: var(--bg-active);
+}
+
+.dark-theme .theme-btn.active {
+  color: var(--primary-dark);
+  background-color: var(--primary-light);
+  border-color: var(--primary-dark);
+} 

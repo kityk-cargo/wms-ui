@@ -1,0 +1,38 @@
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--border-radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status-pending {
+  background-color: var(--status-pending-bg);
+  color: var(--status-pending-text);
+}
+
+.status-allocated {
+  background-color: var(--status-allocated-bg);
+  color: var(--status-allocated-text);
+}
+
+.status-processing {
+  background-color: var(--status-processing-bg);
+  color: var(--status-processing-text);
+}
+
+.status-shipped {
+  background-color: var(--status-shipped-bg);
+  color: var(--status-shipped-text);
+}
+
+.status-delivered {
+  background-color: var(--status-delivered-bg);
+  color: var(--status-delivered-text);
+}
+
+.status-cancelled {
+  background-color: var(--status-cancelled-bg);
+  color: var(--status-cancelled-text);
+} 

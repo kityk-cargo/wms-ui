@@ -7,6 +7,21 @@
     <title>WMS - Warehouse Management System</title>
     <!-- Runtime environment configuration - populated by docker-entrypoint.sh -->
     <script src="/env-config.js"></script>
+    <!-- Theme initialization script to avoid flash of wrong theme -->
+    <script>
+      (function() {
+        // Check for stored theme preference
+        const storedTheme = localStorage.getItem('theme') || 'system';
+        const systemDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        // Set theme class on root element
+        const effectiveTheme = storedTheme === 'system' 
+          ? (systemDarkMode ? 'dark' : 'light')
+          : storedTheme;
+        
+        document.documentElement.classList.add(`${effectiveTheme}-theme`);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

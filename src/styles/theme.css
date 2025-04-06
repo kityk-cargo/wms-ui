@@ -1,0 +1,144 @@
+:root {
+  /* Common variables */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
+  --border-radius-full: 9999px;
+  
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+  /* Default/light theme */
+  --primary: #2563eb;
+  --primary-light: #dbeafe;
+  --primary-dark: #1d4ed8;
+  --primary-border: #93c5fd;
+  
+  --danger: #ef4444;
+  --danger-light: #fee2e2;
+  --danger-dark: #b91c1c;
+  
+  --success: #10b981;
+  --success-light: #d1fae5;
+  --success-dark: #047857;
+  
+  --warning: #f59e0b;
+  --warning-light: #fef3c7;
+  --warning-dark: #b45309;
+  
+  --bg-body: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-hover: #f1f5f9;
+  --bg-active: #e2e8f0;
+  --bg-muted: #f8fafc;
+  
+  --border-color: #e2e8f0;
+  --border-color-hover: #cbd5e1;
+  
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  --text-inverted: #ffffff;
+  
+  --header-bg: #1e293b;
+  --header-text: #ffffff;
+  --footer-bg: #f1f5f9;
+  --footer-text: #64748b;
+}
+
+/* Dark theme */
+.dark-theme {
+  --primary: #3b82f6;
+  --primary-light: #1e40af;
+  --primary-dark: #60a5fa;
+  --primary-border: #1d4ed8;
+  
+  --danger: #f87171;
+  --danger-light: #7f1d1d;
+  --danger-dark: #fca5a5;
+  
+  --success: #34d399;
+  --success-light: #065f46;
+  --success-dark: #6ee7b7;
+  
+  --warning: #fbbf24;
+  --warning-light: #92400e;
+  --warning-dark: #fcd34d;
+  
+  --bg-body: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-hover: #334155;
+  --bg-active: #475569;
+  --bg-muted: #1e293b;
+  
+  --border-color: #334155;
+  --border-color-hover: #475569;
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --text-inverted: #0f172a;
+  
+  --header-bg: #0f172a;
+  --header-text: #f8fafc;
+  --footer-bg: #1e293b;
+  --footer-text: #cbd5e1;
+  
+  /* Adjust shadows for dark mode */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+}
+
+/* Status badge colors - light theme */
+:root {
+  --status-pending-bg: #fef9c3;
+  --status-pending-text: #854d0e;
+  
+  --status-allocated-bg: #e0f2fe;
+  --status-allocated-text: #0369a1;
+  
+  --status-processing-bg: #dbeafe;
+  --status-processing-text: #1e40af;
+  
+  --status-shipped-bg: #dcfce7;
+  --status-shipped-text: #166534;
+  
+  --status-delivered-bg: #bbf7d0;
+  --status-delivered-text: #15803d;
+  
+  --status-cancelled-bg: #fee2e2;
+  --status-cancelled-text: #b91c1c;
+}
+
+/* Status badge colors - dark theme */
+.dark-theme {
+  --status-pending-bg: #713f12;
+  --status-pending-text: #fef08a;
+  
+  --status-allocated-bg: #075985;
+  --status-allocated-text: #bae6fd;
+  
+  --status-processing-bg: #1e3a8a;
+  --status-processing-text: #bfdbfe;
+  
+  --status-shipped-bg: #14532d;
+  --status-shipped-text: #bbf7d0;
+  
+  --status-delivered-bg: #166534;
+  --status-delivered-text: #86efac;
+  
+  --status-cancelled-bg: #7f1d1d;
+  --status-cancelled-text: #fecaca;
+} 

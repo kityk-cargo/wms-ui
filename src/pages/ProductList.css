@@ -1,0 +1,106 @@
+.product-list-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.product-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-8);
+}
+
+.product-list-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: var(--text-primary);
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-6);
+}
+
+.product-card {
+  background-color: var(--bg-surface);
+  padding: var(--spacing-6);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.product-header {
+  margin-bottom: var(--spacing-3);
+}
+
+.product-header h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.125rem;
+  color: var(--text-primary);
+}
+
+.product-sku {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.product-category {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-3);
+  background-color: var(--bg-muted);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  display: inline-block;
+}
+
+.product-description {
+  font-size: 0.875rem;
+  margin-bottom: var(--spacing-4);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.product-meta {
+  margin-top: var(--spacing-6);
+  border-top: 1px solid var(--border-color);
+  padding-top: var(--spacing-4);
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.product-date {
+  margin-bottom: 0.25rem;
+}
+
+.product-date span {
+  font-weight: 500;
+}
+
+.no-products {
+  text-align: center;
+  padding: var(--spacing-12);
+  background-color: var(--bg-surface);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+  color: var(--text-secondary);
+}
+
+.loading, .error {
+  text-align: center;
+  padding: var(--spacing-8);
+  background-color: var(--bg-surface);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.error {
+  color: var(--danger-dark);
+  background-color: var(--danger-light);
+} 
