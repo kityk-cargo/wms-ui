@@ -9,7 +9,7 @@ interface LoadingStateProps {
  */
 export function LoadingState({ message = 'Loading...' }: LoadingStateProps) {
   return (
-    <div className="loading-container">
+    <div className="loading-container" data-testid="loading-container">
       <div className="loading-spinner"></div>
       <p className="loading-message">{message}</p>
     </div>

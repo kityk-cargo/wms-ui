@@ -1,44 +1,34 @@
-import { useState, useEffect } from 'react';
-import {
-  initializeTheme,
-  applyTheme,
-  setupThemeListeners,
-  removeThemeListeners,
-  Theme,
-} from '../utils/theme';
+import { observer } from 'mobx-react-lite';
+import { useEffect } from 'react';
+import { useThemeStore } from '../stores/StoreContext';
 import './ThemeToggle.css';
 
 /**
  * ThemeToggle component that allows switching between light, dark, and system theme
  */
-export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>(initializeTheme());
-  const [isExpanded, setIsExpanded] = useState(false);
+export const ThemeToggle = observer(() => {
+  const themeStore = useThemeStore();
 
+  // Apply theme when component mounts
   useEffect(() => {
-    // Apply the current theme
-    applyTheme(theme);
-
-    // Set up listeners for system theme changes
-    setupThemeListeners(theme);
-
-    // Cleanup function to remove previously registered listeners
+    // The theme is already applied in the ThemeStore constructor
+    // This is just to handle component unmount
     return () => {
-      removeThemeListeners();
+      // No need to do anything on unmount as the store handles cleanup
     };
-  }, [theme]);
+  }, []);
 
-  const handleThemeChange = (newTheme: Theme) => {
-    setTheme(newTheme);
-    setIsExpanded(false);
+  const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
+    themeStore.setTheme(newTheme);
+    themeStore.setExpanded(false);
   };
 
   return (
     <div className="theme-toggle">
-      {!isExpanded ? (
+      {!themeStore.isExpanded ? (
         <button
           className="theme-toggle-button"
-          onClick={() => setIsExpanded(true)}
+          onClick={() => themeStore.setExpanded(true)}
           aria-label="Open theme settings"
         >
           <svg
@@ -62,7 +52,7 @@ export function ThemeToggle() {
       ) : (
         <div className="theme-options">
           <button
-            className={`theme-btn ${theme === 'light' ? 'active' : ''}`}
+            className={`theme-btn ${themeStore.theme === 'light' ? 'active' : ''}`}
             onClick={() => handleThemeChange('light')}
             title="Light mode"
             aria-label="Switch to light mode"
@@ -88,7 +78,7 @@ export function ThemeToggle() {
             <span className="theme-btn-label">Light</span>
           </button>
           <button
-            className={`theme-btn ${theme === 'dark' ? 'active' : ''}`}
+            className={`theme-btn ${themeStore.theme === 'dark' ? 'active' : ''}`}
             onClick={() => handleThemeChange('dark')}
             title="Dark mode"
             aria-label="Switch to dark mode"
@@ -108,7 +98,7 @@ export function ThemeToggle() {
             <span className="theme-btn-label">Dark</span>
           </button>
           <button
-            className={`theme-btn ${theme === 'system' ? 'active' : ''}`}
+            className={`theme-btn ${themeStore.theme === 'system' ? 'active' : ''}`}
             onClick={() => handleThemeChange('system')}
             title="System preference"
             aria-label="Use system theme preference"
@@ -137,7 +127,7 @@ export function ThemeToggle() {
           </button>
           <button
             className="theme-close-btn"
-            onClick={() => setIsExpanded(false)}
+            onClick={() => themeStore.setExpanded(false)}
             aria-label="Close theme settings"
           >
             <svg
@@ -160,4 +150,4 @@ export function ThemeToggle() {
       )}
     </div>
   );
-}
+});

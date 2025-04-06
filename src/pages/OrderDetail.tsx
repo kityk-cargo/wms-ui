@@ -1,50 +1,43 @@
-import { useState, useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
+import { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { fetchOrder } from '../services/api';
-import { Order } from '../types';
+import { useOrderStore } from '../stores/StoreContext';
 import { formatCurrency, formatDateLong } from '../utils/formatters';
-import { LoadingState } from '../components/LoadingState';
-import { ErrorMessage } from '../components/ErrorMessage';
-import { StatusBadge } from '../components/StatusBadge';
+import { LoadingState, ErrorMessage, StatusBadge } from '../components';
 import './OrderDetail.css';
 
-export function OrderDetail() {
+/**
+ * OrderDetail component that displays a single order's details
+ */
+export const OrderDetail = observer(() => {
   const { id } = useParams<{ id: string }>();
-  const [order, setOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const orderStore = useOrderStore();
 
   useEffect(() => {
-    const getOrder = async () => {
-      if (!id) return;
+    // Load order when component mounts or id changes
+    if (id) {
+      orderStore.loadOrder(Number(id));
+    }
 
-      try {
-        setLoading(true);
-        const data = await fetchOrder(Number(id));
-        setOrder(data);
-        setError(null);
-      } catch (err) {
-        setError('Failed to fetch order details. Please try again later.');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+    // Reset store when component unmounts
+    return () => {
+      orderStore.reset();
     };
+  }, [id, orderStore]);
 
-    getOrder();
-  }, [id]);
-
-  if (loading) {
+  if (orderStore.loading) {
     return <LoadingState message="Loading order details..." />;
   }
 
-  if (error) {
-    return <ErrorMessage message={error} />;
+  if (orderStore.error) {
+    return <ErrorMessage message={orderStore.error} />;
   }
 
-  if (!order) {
+  if (!orderStore.currentOrder) {
     return <ErrorMessage message="Order not found" />;
   }
+
+  const order = orderStore.currentOrder;
 
   return (
     <div className="order-detail-page">
@@ -155,4 +148,4 @@ export function OrderDetail() {
       </div>
     </div>
   );
-}
+});

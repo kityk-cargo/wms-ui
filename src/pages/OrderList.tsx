@@ -1,40 +1,33 @@
-import { useState, useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchOrders } from '../services/api';
-import { Order } from '../types';
+import { useOrderStore } from '../stores/StoreContext';
 import { formatCurrency, formatDate } from '../utils';
 import { LoadingState, ErrorMessage, StatusBadge } from '../components';
 import './OrderList.css';
 
-export function OrderList() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+/**
+ * OrderList component that displays all orders
+ */
+export const OrderList = observer(() => {
+  const orderStore = useOrderStore();
 
   useEffect(() => {
-    const getOrders = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchOrders();
-        setOrders(data);
-        setError(null);
-      } catch (err) {
-        setError('Failed to fetch orders. Please try again later.');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+    // Load orders when component mounts
+    orderStore.loadOrders();
+
+    // Reset store when component unmounts
+    return () => {
+      orderStore.reset();
     };
+  }, [orderStore]);
 
-    getOrders();
-  }, []);
-
-  if (loading) {
+  if (orderStore.loading) {
     return <LoadingState message="Loading orders..." />;
   }
 
-  if (error) {
-    return <ErrorMessage message={error} />;
+  if (orderStore.error) {
+    return <ErrorMessage message={orderStore.error} />;
   }
 
   return (
@@ -46,7 +39,7 @@ export function OrderList() {
         </Link>
       </div>
 
-      {orders.length === 0 ? (
+      {orderStore.orders.length === 0 ? (
         <div className="no-orders">
           <p>No orders found.</p>
         </div>
@@ -65,7 +58,7 @@ export function OrderList() {
               </tr>
             </thead>
             <tbody>
-              {orders.map((order) => (
+              {orderStore.orders.map((order) => (
                 <tr key={order.id}>
                   <td>{order.id}</td>
                   <td>{order.orderReference || '-'}</td>
@@ -88,4 +81,4 @@ export function OrderList() {
       )}
     </div>
   );
-}
+});

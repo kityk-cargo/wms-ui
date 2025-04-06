@@ -37,5 +37,16 @@ declare module '@pact-foundation/pact' {
     static date(format: string, value?: string): string;
     static timestamp(format: string, value?: string): string;
     static regex(regex: RegExp | string, value: string): string;
+
+    // Additional matcher functions
+    static string(value: string): string;
+    static iso8601DateTime(value?: string): string;
+    static iso8601Date(value?: string): string;
+    static iso8601Time(value?: string): string;
+    static uuid(value?: string): string;
+    static ipv4Address(value?: string): string;
+    static ipv6Address(value?: string): string;
+    static email(value?: string): string;
+    static hexadecimal(value?: string): string;
   }
 }

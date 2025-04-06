@@ -6,20 +6,23 @@ import { OrderList } from './pages/OrderList';
 import { OrderDetail } from './pages/OrderDetail';
 import { OrderCreate } from './pages/OrderCreate';
 import { ProductList } from './pages/ProductList';
+import { StoreProvider } from './stores/StoreContext';
 
 function App() {
   return (
-    <Router>
-      <MainLayout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/orders" element={<OrderList />} />
-          <Route path="/orders/create" element={<OrderCreate />} />
-          <Route path="/orders/:id" element={<OrderDetail />} />
-          <Route path="/products" element={<ProductList />} />
-        </Routes>
-      </MainLayout>
-    </Router>
+    <StoreProvider>
+      <Router>
+        <MainLayout>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/orders" element={<OrderList />} />
+            <Route path="/orders/create" element={<OrderCreate />} />
+            <Route path="/orders/:id" element={<OrderDetail />} />
+            <Route path="/products" element={<ProductList />} />
+          </Routes>
+        </MainLayout>
+      </Router>
+    </StoreProvider>
   );
 }
 
