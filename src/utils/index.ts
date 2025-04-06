@@ -1,2 +1,2 @@
 export * from './formatters';
-export * from './theme';
+// Removed theme export as it's now managed by ThemeStore

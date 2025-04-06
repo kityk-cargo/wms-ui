@@ -1,38 +1,32 @@
-import { useState, useEffect } from 'react';
-import { fetchProducts } from '../services/api';
-import { Product } from '../types';
+import { observer } from 'mobx-react-lite';
+import { useEffect } from 'react';
+import { useProductStore } from '../stores/StoreContext';
 import { formatDate } from '../utils/formatters';
+import { LoadingState, ErrorMessage } from '../components';
 import './ProductList.css';
 
-export function ProductList() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
+/**
+ * ProductList component that displays all products
+ */
+export const ProductList = observer(() => {
+  const productStore = useProductStore();
+  
   useEffect(() => {
-    const getProducts = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchProducts();
-        setProducts(data);
-        setError(null);
-      } catch (err) {
-        setError('Failed to fetch products. Please try again later.');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+    // Load products when component mounts
+    productStore.loadProducts();
+    
+    // Reset store when component unmounts
+    return () => {
+      productStore.reset();
     };
+  }, [productStore]);
 
-    getProducts();
-  }, []);
-
-  if (loading) {
-    return <div className="loading">Loading products...</div>;
+  if (productStore.loading) {
+    return <LoadingState message="Loading products..." />;
   }
 
-  if (error) {
-    return <div className="error">{error}</div>;
+  if (productStore.error) {
+    return <ErrorMessage message={productStore.error} />;
   }
 
   return (
@@ -41,11 +35,11 @@ export function ProductList() {
         <h1>Products</h1>
       </div>
 
-      {products.length === 0 ? (
+      {productStore.products.length === 0 ? (
         <div className="no-products">No products found.</div>
       ) : (
         <div className="product-grid">
-          {products.map((product) => (
+          {productStore.products.map((product) => (
             <div key={product.id} className="product-card">
               <div className="product-header">
                 <h3>{product.name}</h3>
@@ -71,4 +65,4 @@ export function ProductList() {
       )}
     </div>
   );
-}
+});
