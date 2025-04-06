@@ -1,5 +1,5 @@
 import { config } from '../config';
-import { Order, OrderCreate, Product as ProductType } from '../types';
+import { Order, OrderCreate } from '../types';
 
 // Type definitions
 export interface Product {

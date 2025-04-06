@@ -55,7 +55,7 @@ export function setupThemeListeners(theme: Theme): void {
     );
 
     // Handle system theme changes
-    const handleThemeChange = (e: MediaQueryListEvent) => {
+    const handleThemeChange = (_e: MediaQueryListEvent) => {
       applyTheme('system');
     };
 

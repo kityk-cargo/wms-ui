@@ -32,7 +32,12 @@ export interface Order {
   id: number;
   orderReference?: string;
   customerId: number;
-  customer?: any;
+  customer?: {
+    id: number;
+    name?: string;
+    email?: string;
+    [key: string]: unknown;
+  };
   orderDate: string;
   status:
     | 'Pending'

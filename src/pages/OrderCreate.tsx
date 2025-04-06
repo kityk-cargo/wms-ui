@@ -5,6 +5,7 @@ import {
   Product,
   OrderItemCreate,
   OrderCreate as OrderCreateType,
+  Order,
 } from '../types';
 import { formatCurrency } from '../utils/formatters';
 import './OrderCreate.css';
@@ -32,7 +33,7 @@ export function OrderCreate() {
   >(new Map());
   const [customerId, setCustomerId] = useState<number>(1); // Default customer ID
   const [submitting, setSubmitting] = useState(false);
-  const [orderResponse, setOrderResponse] = useState<any>(null);
+  const [orderResponse, setOrderResponse] = useState<Order | null>(null);
 
   // Load products on component mount
   useEffect(() => {
@@ -232,9 +233,6 @@ export function OrderCreate() {
       );
     }
 
-    // Calculate total
-    const totalAmount = 0;
-
     return (
       <div className="order-review">
         <h2>Review Your Order</h2>
@@ -421,6 +419,15 @@ export function OrderCreate() {
               setCurrentStep(OrderCreationStep.ProductSelection);
             }
           }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              if (currentStep > OrderCreationStep.ProductSelection) {
+                setCurrentStep(OrderCreationStep.ProductSelection);
+              }
+            }
+          }}
+          role="button"
+          tabIndex={0}
         >
           <div className="step-number">1</div>
           <div className="step-label">Product Selection</div>
@@ -439,6 +446,20 @@ export function OrderCreate() {
               setCurrentStep(OrderCreationStep.OrderReview);
             }
           }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              if (currentStep > OrderCreationStep.OrderReview) {
+                setCurrentStep(OrderCreationStep.OrderReview);
+              } else if (
+                selectedProducts.size > 0 &&
+                currentStep === OrderCreationStep.ProductSelection
+              ) {
+                setCurrentStep(OrderCreationStep.OrderReview);
+              }
+            }
+          }}
+          role="button"
+          tabIndex={0}
         >
           <div className="step-number">2</div>
           <div className="step-label">Review Order</div>
