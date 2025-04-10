@@ -11,7 +11,7 @@ import { ReactNode } from 'react';
 // Mock the store and router hooks
 vi.mock('../stores/StoreContext', () => ({
   useOrderStore: vi.fn(),
-  StoreProvider: ({ children }: { children: ReactNode }) => children
+  StoreProvider: ({ children }: { children: ReactNode }) => children,
 }));
 
 vi.mock('react-router-dom', () => ({
@@ -21,7 +21,9 @@ vi.mock('react-router-dom', () => ({
       {children}
     </a>
   ),
-  MemoryRouter: ({ children }: { children: React.ReactNode }) => <>{children}</>
+  MemoryRouter: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
 }));
 
 describe('OrderDetail', () => {
@@ -33,7 +35,7 @@ describe('OrderDetail', () => {
     loadOrder: vi.fn(),
     reset: vi.fn(),
   };
-  
+
   // Default params
   const mockParams = { id: '3' };
 
@@ -47,10 +49,10 @@ describe('OrderDetail', () => {
   it('should render loading state when loading order', () => {
     // Arrange: Set loading to true
     mockOrderStore.loading = true;
-    
+
     // Act: Render component
     renderWithProviders(<OrderDetail />);
-    
+
     // Assert: Check loading message is displayed
     expect(screen.getByText('Loading order details...')).toBeInTheDocument();
   });
@@ -59,10 +61,10 @@ describe('OrderDetail', () => {
     // Arrange: Set error message
     mockOrderStore.loading = false;
     mockOrderStore.error = 'Failed to load order';
-    
+
     // Act: Render component
     renderWithProviders(<OrderDetail />);
-    
+
     // Assert: Check error message is displayed
     expect(screen.getByText('Failed to load order')).toBeInTheDocument();
   });
@@ -72,10 +74,10 @@ describe('OrderDetail', () => {
     mockOrderStore.loading = false;
     mockOrderStore.error = null;
     mockOrderStore.currentOrder = null;
-    
+
     // Act: Render component
     renderWithProviders(<OrderDetail />);
-    
+
     // Assert: Check not found message is displayed
     expect(screen.getByText('Order not found')).toBeInTheDocument();
   });
@@ -84,7 +86,7 @@ describe('OrderDetail', () => {
     // Arrange: Set mock order data
     mockOrderStore.loading = false;
     mockOrderStore.error = null;
-    mockOrderStore.currentOrder = { 
+    mockOrderStore.currentOrder = {
       ...mockSingleOrder,
       orderReference: 'REF-12345',
       notes: 'Test order notes',
@@ -92,28 +94,32 @@ describe('OrderDetail', () => {
       shippingCity: 'Test City',
       shippingState: 'TS',
       shippingZipCode: '12345',
-      shippingCountry: 'Test Country'
+      shippingCountry: 'Test Country',
     };
-    
+
     // Act: Render component
     renderWithProviders(<OrderDetail />);
-    
+
     // Assert: Check order details are displayed
-    expect(screen.getByText(`Order #${mockSingleOrder.id}`)).toBeInTheDocument();
+    expect(
+      screen.getByText(`Order #${mockSingleOrder.id}`),
+    ).toBeInTheDocument();
     expect(screen.getByText(`Reference: REF-12345`)).toBeInTheDocument();
     expect(screen.getByText('Back to Orders')).toBeInTheDocument();
-    
+
     // Check order details section
     expect(screen.getByText('Order Details')).toBeInTheDocument();
     expect(screen.getByText('Status:')).toBeInTheDocument();
     expect(screen.getByText(mockSingleOrder.status)).toBeInTheDocument();
     expect(screen.getByText('Order Date:')).toBeInTheDocument();
     expect(screen.getByText('Customer ID:')).toBeInTheDocument();
-    expect(screen.getByText(mockSingleOrder.customerId.toString())).toBeInTheDocument();
+    expect(
+      screen.getByText(mockSingleOrder.customerId.toString()),
+    ).toBeInTheDocument();
     expect(screen.getByText('Total Amount:')).toBeInTheDocument();
     expect(screen.getByText('Notes:')).toBeInTheDocument();
     expect(screen.getByText('Test order notes')).toBeInTheDocument();
-    
+
     // Check shipping information section
     expect(screen.getByText('Shipping Information')).toBeInTheDocument();
     expect(screen.getByText('Address:')).toBeInTheDocument();
@@ -126,20 +132,20 @@ describe('OrderDetail', () => {
     expect(screen.getByText('12345')).toBeInTheDocument();
     expect(screen.getByText('Country:')).toBeInTheDocument();
     expect(screen.getByText('Test Country')).toBeInTheDocument();
-    
+
     // Check order items section
     expect(screen.getByText('Order Items')).toBeInTheDocument();
     expect(screen.getByText('Product ID')).toBeInTheDocument();
     expect(screen.getByText('Quantity')).toBeInTheDocument();
     expect(screen.getByText('Price')).toBeInTheDocument();
     expect(screen.getByText('Total')).toBeInTheDocument();
-    
+
     // Check order items are rendered
-    mockSingleOrder.items.forEach(item => {
+    mockSingleOrder.items.forEach((item) => {
       expect(screen.getByText(item.productId.toString())).toBeInTheDocument();
       expect(screen.getByText(item.quantity.toString())).toBeInTheDocument();
     });
-    
+
     // Check total
     expect(screen.getByText('Total:')).toBeInTheDocument();
   });
@@ -148,14 +154,14 @@ describe('OrderDetail', () => {
     // Arrange: Set mock order data without shipping info
     mockOrderStore.loading = false;
     mockOrderStore.error = null;
-    mockOrderStore.currentOrder = { 
+    mockOrderStore.currentOrder = {
       ...mockSingleOrder,
-      shippingAddress: undefined,  // Using undefined to match the Order type's optional field
+      shippingAddress: undefined, // Using undefined to match the Order type's optional field
     };
-    
+
     // Act: Render component
     renderWithProviders(<OrderDetail />);
-    
+
     // Assert: Should not find shipping information
     expect(screen.queryByText('Shipping Information')).not.toBeInTheDocument();
   });
@@ -163,7 +169,7 @@ describe('OrderDetail', () => {
   it('should call loadOrder with correct id on component mount', () => {
     // Arrange & Act: Render component
     renderWithProviders(<OrderDetail />);
-    
+
     // Assert: loadOrder should be called with the ID from params
     expect(mockOrderStore.loadOrder).toHaveBeenCalledTimes(1);
     expect(mockOrderStore.loadOrder).toHaveBeenCalledWith(3);
@@ -172,11 +178,11 @@ describe('OrderDetail', () => {
   it('should call reset when component unmounts', () => {
     // Arrange: Render component
     const { unmount } = renderWithProviders(<OrderDetail />);
-    
+
     // Act: Unmount component
     unmount();
-    
+
     // Assert: reset should be called
     expect(mockOrderStore.reset).toHaveBeenCalledTimes(1);
   });
-}); 
+});

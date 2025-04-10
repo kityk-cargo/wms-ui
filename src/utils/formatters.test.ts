@@ -1,9 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { 
-  formatCurrency, 
-  formatDate, 
-  formatDateLong, 
-  formatDateTime 
+import {
+  formatCurrency,
+  formatDate,
+  formatDateLong,
+  formatDateTime,
 } from './formatters';
 
 // Mock the Intl.NumberFormat and Date.toLocaleDateString
@@ -91,7 +91,7 @@ describe('Formatters', () => {
       // Use a fixed date for testing: January 15, 2023, 14:30:45
       const testDateISO = '2023-01-15T14:30:45Z';
       const result = formatDateTime(testDateISO);
-      
+
       // The exact output may depend on the timezone, so we check for the key components
       expect(result).toMatch(/\d{1,2}\/\d{1,2}\/\d{4}/); // Date part
       expect(result).toMatch(/\d{1,2}:\d{2}:\d{2}/); // Time part with seconds
@@ -110,4 +110,4 @@ describe('Formatters', () => {
       expect(() => formatDateTime('invalid-date')).not.toThrow();
     });
   });
-}); 
+});
