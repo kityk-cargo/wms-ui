@@ -19,6 +19,9 @@
           ? (systemDarkMode ? 'dark' : 'light')
           : storedTheme;
         
+        // Remove any existing theme classes first
+        document.documentElement.classList.remove('light-theme', 'dark-theme');
+        // Add the appropriate theme class
         document.documentElement.classList.add(`${effectiveTheme}-theme`);
       })();
     </script>

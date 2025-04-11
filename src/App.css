@@ -92,10 +92,10 @@ code {
 .mr-2 { margin-right: var(--spacing-2); }
 
 #root {
-  max-width: 1280px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  padding: 0;
+  text-align: left;
 }
 
 .logo {
