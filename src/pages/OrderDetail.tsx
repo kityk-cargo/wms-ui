@@ -44,9 +44,6 @@ export const OrderDetail = observer(() => {
       <div className="order-detail-header">
         <div>
           <h1>Order #{order.id}</h1>
-          {order.orderReference && (
-            <p className="order-reference">Reference: {order.orderReference}</p>
-          )}
         </div>
         <div className="order-actions">
           <Link to="/orders" className="btn btn-secondary">

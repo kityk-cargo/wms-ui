@@ -41,7 +41,6 @@ const orderItemSchema = {
 // Define order schema with matchers for more flexible contract
 const orderSchema = {
   id: Matchers.integer(1),
-  orderReference: Matchers.string('ORD-2023-001'),
   customerId: Matchers.integer(1),
   orderDate: Matchers.iso8601DateTime(),
   status: Matchers.term({

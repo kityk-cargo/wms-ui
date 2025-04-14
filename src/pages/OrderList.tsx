@@ -49,7 +49,6 @@ export const OrderList = observer(() => {
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Reference</th>
                 <th>Customer ID</th>
                 <th>Date</th>
                 <th>Status</th>
@@ -61,7 +60,6 @@ export const OrderList = observer(() => {
               {orderStore.orders.map((order) => (
                 <tr key={order.id}>
                   <td>{order.id}</td>
-                  <td>{order.orderReference || '-'}</td>
                   <td>{order.customerId}</td>
                   <td>{formatDate(order.orderDate)}</td>
                   <td>

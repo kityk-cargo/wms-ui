@@ -350,12 +350,6 @@ export function OrderCreate() {
             <span className="detail-label">Order ID:</span>
             <span>{orderResponse.id}</span>
           </div>
-          {orderResponse.orderReference && (
-            <div className="detail-row">
-              <span className="detail-label">Reference:</span>
-              <span>{orderResponse.orderReference}</span>
-            </div>
-          )}
           <div className="detail-row">
             <span className="detail-label">Status:</span>
             <span
