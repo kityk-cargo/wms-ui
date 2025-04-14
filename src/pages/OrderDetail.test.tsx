@@ -88,7 +88,6 @@ describe('OrderDetail', () => {
     mockOrderStore.error = null;
     mockOrderStore.currentOrder = {
       ...mockSingleOrder,
-      orderReference: 'REF-12345',
       notes: 'Test order notes',
       shippingAddress: '123 Test St',
       shippingCity: 'Test City',
@@ -104,7 +103,6 @@ describe('OrderDetail', () => {
     expect(
       screen.getByText(`Order #${mockSingleOrder.id}`),
     ).toBeInTheDocument();
-    expect(screen.getByText(`Reference: REF-12345`)).toBeInTheDocument();
     expect(screen.getByText('Back to Orders')).toBeInTheDocument();
 
     // Check order details section

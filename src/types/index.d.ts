@@ -30,7 +30,6 @@ export interface OrderCreate {
 
 export interface Order {
   id: number;
-  orderReference?: string;
   customerId: number;
   customer?: {
     id: number;

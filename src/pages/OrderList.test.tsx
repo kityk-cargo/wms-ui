@@ -79,7 +79,6 @@ describe('OrderList', () => {
 
     // Check table headers
     expect(screen.getByText('ID')).toBeInTheDocument();
-    expect(screen.getByText('Reference')).toBeInTheDocument();
     expect(screen.getByText('Customer ID')).toBeInTheDocument();
     expect(screen.getByText('Date')).toBeInTheDocument();
     expect(screen.getByText('Status')).toBeInTheDocument();
