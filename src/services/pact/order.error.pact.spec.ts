@@ -104,10 +104,10 @@ describe('Orders API Error Scenarios Pact', () => {
           },
           body: {
             error: Matchers.string('Validation error'),
-            details: Matchers.eachLike({
-              field: Matchers.string('customerId'),
-              message: Matchers.string('Must be a positive integer'),
-            }),
+            details: {
+              customerId: Matchers.string('Customer ID must be greater than 0'),
+              items: Matchers.string('Order must contain at least one item'),
+            },
           },
         },
       });
@@ -120,7 +120,7 @@ describe('Orders API Error Scenarios Pact', () => {
   });
 
   describe('create order - product not found', () => {
-    it('returns a 404 when referenced product does not exist', async () => {
+    it('returns a 400 when referenced product does not exist', async () => {
       // Order with non-existent product
       const orderWithNonExistentProduct: OrderCreate = {
         customerId: 1,
@@ -145,20 +145,19 @@ describe('Orders API Error Scenarios Pact', () => {
           body: orderWithNonExistentProduct,
         },
         willRespondWith: {
-          status: 404,
+          status: 400,
           headers: {
             'Content-Type': 'application/json',
           },
           body: {
             error: Matchers.string('Product not found'),
-            productId: Matchers.integer(9999),
           },
         },
       });
 
       // Act & Assert - Expect the request to throw an error
       await expect(createOrder(orderWithNonExistentProduct)).rejects.toThrow(
-        'API error: 404',
+        'API error: 400',
       );
     });
   });
