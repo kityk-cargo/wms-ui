@@ -106,8 +106,8 @@ describe('Orders API Error Scenarios Pact', () => {
             error: Matchers.string('Validation error'),
             details: {
               customerId: Matchers.string('Customer ID must be greater than 0'),
-              items: Matchers.string('Order must contain at least one item')
-            }
+              items: Matchers.string('Order must contain at least one item'),
+            },
           },
         },
       });
