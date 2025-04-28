@@ -34,6 +34,13 @@ const productSchema = {
   updated_at: Matchers.iso8601DateTime(),
 };
 
+// Create a common error format template
+const commonErrorTemplate = {
+  criticality: Matchers.string('critical'),
+  id: Matchers.uuid(),
+  detail: Matchers.string('Error message will go here'),
+};
+
 describe('Product Single Operations API Pact', () => {
   const provider = new Pact({
     consumer: 'wms_ui',
@@ -110,14 +117,46 @@ describe('Product Single Operations API Pact', () => {
             'Content-Type': 'application/json',
           },
           body: {
-            error: Matchers.string('Product not found'),
+            ...commonErrorTemplate,
+            detail: Matchers.string('Product not found'),
           },
         },
       });
 
       // Act & Assert - Expect the request to throw an error
       await expect(fetchProduct(nonExistentProductId)).rejects.toThrow(
-        'API error: 404',
+        'Product not found',
+      );
+    });
+  });
+
+  describe('get product - server error', () => {
+    it('handles unexpected server errors gracefully', async () => {
+      const productId = 1;
+
+      // Arrange - Setup the expected interaction
+      await provider.addInteraction({
+        state: 'product service is experiencing issues',
+        uponReceiving: 'a request during server issues',
+        withRequest: {
+          method: 'GET',
+          path: `/api/v1/products/${productId}`,
+        },
+        willRespondWith: {
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: {
+            ...commonErrorTemplate,
+            detail: Matchers.string('Internal server error'),
+          },
+        },
+      });
+
+      // Act & Assert - Make the request and expect an error
+      await expect(fetchProduct(productId)).rejects.toThrow(
+        'Internal server error',
       );
     });
   });

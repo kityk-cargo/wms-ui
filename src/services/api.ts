@@ -1,5 +1,6 @@
 import { config } from '../config';
 import { Order, OrderCreate } from '../types';
+import { CommonErrorType } from '../types/errors';
 
 // Type definitions
 export interface Product {
@@ -17,11 +18,13 @@ export interface Product {
  */
 export class ApiError extends Error {
   status: number;
+  errorData?: CommonErrorType;
 
-  constructor(message: string, status: number) {
+  constructor(message: string, status: number, errorData?: CommonErrorType) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
+    this.errorData = errorData;
   }
 }
 
@@ -47,7 +50,22 @@ async function apiRequest<T>(
     const response = hasOptions ? await fetch(url, options) : await fetch(url);
 
     if (!response.ok) {
-      throw new ApiError(`API error: ${response.status}`, response.status);
+      // Parse the error response using the common error format
+      try {
+        const errorData = await response.json();
+
+        // Expect only common error format responses
+        if (errorData.criticality && errorData.id && errorData.detail) {
+          throw new ApiError(errorData.detail, response.status, errorData);
+        }
+
+        // If we get here, it's not in the expected format
+        throw new ApiError(`API error: ${response.status}`, response.status);
+      } catch (parseError) {
+        // If we can't parse the response (e.g., it's not JSON)
+        if (parseError instanceof ApiError) throw parseError;
+        throw new ApiError(`API error: ${response.status}`, response.status);
+      }
     }
 
     // For DELETE operations that don't return content

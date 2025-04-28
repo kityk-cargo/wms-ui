@@ -1,31 +1,48 @@
 .error-container {
   display: flex;
-  align-items: center;
-  padding: var(--spacing-6);
-  background-color: var(--danger-light);
-  border-radius: var(--border-radius-md);
-  box-shadow: var(--shadow-md);
-  margin-bottom: var(--spacing-6);
+  flex-direction: column;
+  background-color: #ffebee;
+  border-left: 4px solid #f44336;
+  padding: 12px 16px;
+  margin: 16px 0;
+  border-radius: 4px;
+  position: relative;
 }
 
 .error-icon {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  width: 24px;
+  height: 24px;
+  background-color: #f44336;
+  color: white;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  background-color: var(--danger);
-  color: var(--text-inverted);
-  border-radius: 50%;
   font-weight: bold;
-  font-size: 1.25rem;
-  margin-right: var(--spacing-4);
-  flex-shrink: 0;
 }
 
 .error-message {
-  color: var(--danger-dark);
   margin: 0;
-  font-size: 0.9375rem;
-  line-height: 1.5;
+  padding-left: 32px;
+  color: #d32f2f;
+  font-size: 14px;
+}
+
+.error-title {
+  margin: 0 0 8px 0;
+  padding-left: 32px;
+  color: #b71c1c;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.error-recovery {
+  margin: 8px 0 0 0;
+  padding-left: 32px;
+  color: #37474f;
+  font-size: 14px;
+  font-style: italic;
 } 
