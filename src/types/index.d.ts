@@ -1,6 +1,20 @@
 // Include types from @pact-foundation/pact
 /// <reference types="@pact-foundation/pact" />
 
+// Common Error Format
+export interface CommonErrorType {
+  criticality: 'critical' | 'non-critical' | 'unknown';
+  id: string;
+  title?: string;
+  detail: string;
+  recoverySuggestion?: string;
+  criticalityExplanation?: string;
+  errorCode?: string;
+  suggestedHTTPCode?: number;
+  recoveryData?: Record<string, unknown>;
+  otherErrors?: CommonErrorType[];
+}
+
 // Product interfaces
 export interface Product {
   id: number;

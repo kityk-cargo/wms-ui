@@ -24,6 +24,13 @@ const PACT_PORT = 9777;
 // Get the absolute path to the project root
 const PROJECT_ROOT = path.resolve(process.cwd());
 
+// Create a common error format template
+const commonErrorTemplate = {
+  criticality: Matchers.string('critical'),
+  id: Matchers.uuid(),
+  detail: Matchers.string('Error message will go here'),
+};
+
 describe('Orders API Error Scenarios Pact', () => {
   const provider = new Pact({
     consumer: 'wms_ui',
@@ -65,14 +72,15 @@ describe('Orders API Error Scenarios Pact', () => {
             'Content-Type': 'application/json',
           },
           body: {
-            error: Matchers.string('Order not found'),
+            ...commonErrorTemplate,
+            detail: Matchers.string('Order not found'),
           },
         },
       });
 
       // Act & Assert - Expect the request to throw an error
       await expect(fetchOrder(nonExistentOrderId)).rejects.toThrow(
-        'API error: 404',
+        'Order not found',
       );
     });
   });
@@ -103,18 +111,17 @@ describe('Orders API Error Scenarios Pact', () => {
             'Content-Type': 'application/json',
           },
           body: {
-            error: Matchers.string('Validation error'),
-            details: {
-              customerId: Matchers.string('Customer ID must be greater than 0'),
-              items: Matchers.string('Order must contain at least one item'),
-            },
+            ...commonErrorTemplate,
+            detail: Matchers.string(
+              'Validation error: Customer ID must be greater than 0 and order must contain at least one item',
+            ),
           },
         },
       });
 
       // Act & Assert - Expect the request to throw an error
       await expect(createOrder(invalidOrderData)).rejects.toThrow(
-        'API error: 400',
+        'Validation error: Customer ID must be greater than 0 and order must contain at least one item',
       );
     });
   });
@@ -150,14 +157,15 @@ describe('Orders API Error Scenarios Pact', () => {
             'Content-Type': 'application/json',
           },
           body: {
-            error: Matchers.string('Product not found'),
+            ...commonErrorTemplate,
+            detail: Matchers.string('Product not found'),
           },
         },
       });
 
       // Act & Assert - Expect the request to throw an error
       await expect(createOrder(orderWithNonExistentProduct)).rejects.toThrow(
-        'API error: 400',
+        'Product not found',
       );
     });
   });
@@ -178,7 +186,8 @@ describe('Orders API Error Scenarios Pact', () => {
             'Content-Type': 'application/json',
           },
           body: {
-            error: Matchers.string('Internal server error'),
+            ...commonErrorTemplate,
+            detail: Matchers.string('Internal server error'),
           },
         },
       });
@@ -187,7 +196,7 @@ describe('Orders API Error Scenarios Pact', () => {
       const { fetchOrders } = await import('../api');
 
       // Act & Assert - Expect the request to throw an error
-      await expect(fetchOrders()).rejects.toThrow('API error: 500');
+      await expect(fetchOrders()).rejects.toThrow('Internal server error');
     });
   });
 });

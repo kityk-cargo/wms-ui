@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ErrorMessage } from './ErrorMessage';
+import { CommonErrorType } from '../types/errors';
 
 /**
  * Tests for the ErrorMessage component
@@ -79,5 +80,59 @@ describe('ErrorMessage Component', () => {
     expect(message).toBeInTheDocument();
     expect(message).toHaveTextContent(testMessage);
     expect(message?.tagName).toBe('P');
+  });
+
+  it('renders the error message correctly with string input', () => {
+    // Arrange
+    const errorMessage = 'Something went wrong';
+
+    // Act
+    render(<ErrorMessage message={errorMessage} />);
+
+    // Assert
+    expect(screen.getByTestId('error-container')).toBeInTheDocument();
+    expect(screen.getByText('!')).toBeInTheDocument();
+    expect(screen.getByText(errorMessage)).toBeInTheDocument();
+  });
+
+  it('renders the error message correctly with CommonErrorType input', () => {
+    // Arrange
+    const errorData: CommonErrorType = {
+      criticality: 'critical',
+      id: '123e4567-e89b-12d3-a456-426614174000',
+      title: 'Order Processing Failed',
+      detail: 'Unable to process your order due to invalid payment details',
+      recoverySuggestion:
+        'Please update your payment information and try again',
+    };
+
+    // Act
+    render(<ErrorMessage message={errorData} />);
+
+    // Assert
+    expect(screen.getByTestId('error-container')).toBeInTheDocument();
+    expect(screen.getByText('!')).toBeInTheDocument();
+    expect(screen.getByText(errorData.title!)).toBeInTheDocument();
+    expect(screen.getByText(errorData.detail)).toBeInTheDocument();
+    expect(screen.getByText(errorData.recoverySuggestion!)).toBeInTheDocument();
+  });
+
+  it('renders the error message without title or recovery suggestion when not provided', () => {
+    // Arrange
+    const errorData: CommonErrorType = {
+      criticality: 'non-critical',
+      id: '123e4567-e89b-12d3-a456-426614174000',
+      detail: 'Product information is temporarily unavailable',
+    };
+
+    // Act
+    render(<ErrorMessage message={errorData} />);
+
+    // Assert
+    expect(screen.getByTestId('error-container')).toBeInTheDocument();
+    expect(screen.getByText('!')).toBeInTheDocument();
+    expect(screen.getByText(errorData.detail)).toBeInTheDocument();
+    expect(screen.queryByRole('heading')).not.toBeInTheDocument(); // No title heading
+    expect(screen.queryByText(/please try/i)).not.toBeInTheDocument(); // No recovery suggestion
   });
 });
