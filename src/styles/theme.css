@@ -55,6 +55,20 @@
   --header-text: #0f172a;
   --footer-bg: #f1f5f9;
   --footer-text: #64748b;
+  
+  /* Error-specific colors - light theme */
+  --error-bg: var(--danger-light);
+  --error-border: var(--danger);
+  --error-text: var(--danger-dark);
+  --error-text-secondary: var(--text-secondary);
+  --error-icon-bg: var(--danger);
+  --error-icon-text: var(--text-inverted);
+  
+  /* Loading state colors - light theme */
+  --loading-bg: var(--bg-surface);
+  --loading-text: var(--text-secondary);
+  --loading-border: var(--border-color);
+  --loading-spinner: var(--primary);
 }
 
 /* Dark theme */
@@ -94,6 +108,20 @@
   --header-text: #f8fafc;
   --footer-bg: #1e293b;
   --footer-text: #cbd5e1;
+  
+  /* Error-specific colors - dark theme */
+  --error-bg: var(--danger-light);
+  --error-border: var(--danger);
+  --error-text: var(--danger-dark);
+  --error-text-secondary: var(--text-secondary);
+  --error-icon-bg: var(--danger);
+  --error-icon-text: var(--text-inverted);
+  
+  /* Loading state colors - dark theme */
+  --loading-bg: var(--bg-surface);
+  --loading-text: var(--text-secondary);
+  --loading-border: var(--border-color);
+  --loading-spinner: var(--primary);
   
   /* Adjust shadows for dark mode */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
@@ -141,4 +169,4 @@
   
   --status-cancelled-bg: #7f1d1d;
   --status-cancelled-text: #fecaca;
-} 
+}

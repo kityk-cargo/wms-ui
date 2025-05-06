@@ -115,6 +115,7 @@ describe('ErrorMessage Component', () => {
     expect(screen.getByText(errorData.title!)).toBeInTheDocument();
     expect(screen.getByText(errorData.detail)).toBeInTheDocument();
     expect(screen.getByText(errorData.recoverySuggestion!)).toBeInTheDocument();
+    expect(screen.getByText(`Error ID: ${errorData.id}`)).toBeInTheDocument();
   });
 
   it('renders the error message without title or recovery suggestion when not provided', () => {
@@ -132,6 +133,7 @@ describe('ErrorMessage Component', () => {
     expect(screen.getByTestId('error-container')).toBeInTheDocument();
     expect(screen.getByText('!')).toBeInTheDocument();
     expect(screen.getByText(errorData.detail)).toBeInTheDocument();
+    expect(screen.getByText(`Error ID: ${errorData.id}`)).toBeInTheDocument();
     expect(screen.queryByRole('heading')).not.toBeInTheDocument(); // No title heading
     expect(screen.queryByText(/please try/i)).not.toBeInTheDocument(); // No recovery suggestion
   });
