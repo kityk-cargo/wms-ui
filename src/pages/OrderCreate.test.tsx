@@ -9,6 +9,7 @@ import {
 } from '../test/test-utils';
 import { useNavigate } from 'react-router-dom';
 import * as api from '../services/api';
+import { ApiError } from '../services/api';
 
 // Mock the API functions
 vi.mock('../services/api', async () => {
@@ -58,7 +59,7 @@ describe('OrderCreate', () => {
 
   it('should render error message when products fetch fails', async () => {
     // Arrange: Set up mocks to simulate API error
-    const errorMessage = 'Failed to fetch products. Please try again later.';
+    const errorMessage = 'Failed to fetch products';
     (api.fetchProducts as any).mockRejectedValue(new Error('Network error'));
 
     // Act: Render component
@@ -67,6 +68,33 @@ describe('OrderCreate', () => {
     // Assert: Wait for error message to be displayed
     await waitFor(() => {
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
+      expect(screen.getByTestId('error-container')).toBeInTheDocument();
+      // Client errors should NOT have Error ID displayed
+      expect(screen.queryByText(/Error ID:/)).not.toBeInTheDocument();
+    });
+  });
+
+  it('should render error message when products fetch fails with ApiError', async () => {
+    // Arrange: Set up mocks to simulate API error with Common Error Format
+    const apiError = new ApiError('API Error', 500, {
+      criticality: 'critical',
+      id: 'test-id-123',
+      detail: 'Server error occurred',
+    });
+    (api.fetchProducts as any).mockRejectedValue(apiError);
+
+    // Act: Render component
+    renderWithProviders(<OrderCreate />);
+
+    // Assert: Wait for error message to be displayed
+    await waitFor(() => {
+      expect(screen.getByText('Server error occurred')).toBeInTheDocument();
+      // API errors should have Error ID displayed
+      if (apiError.errorData && apiError.errorData.id) {
+        expect(
+          screen.getByText(`Error ID: ${apiError.errorData.id}`),
+        ).toBeInTheDocument();
+      }
     });
   });
 
@@ -316,9 +344,60 @@ describe('OrderCreate', () => {
 
     // Assert: Error message is shown
     await waitFor(() => {
+      expect(screen.getByText('Failed to create order')).toBeInTheDocument();
+      expect(screen.getByTestId('error-container')).toBeInTheDocument();
+      // Client errors should NOT have Error ID displayed
+      expect(screen.queryByText(/Error ID:/)).not.toBeInTheDocument();
+    });
+  });
+
+  it('should show error with Common Error Format when order creation fails with ApiError', async () => {
+    // Arrange: Setup API to fail with ApiError
+    const apiError = new ApiError('API Error', 400, {
+      criticality: 'critical',
+      id: 'order-error-123',
+      detail: 'Invalid order data',
+      title: 'Order Validation Failed',
+    });
+    (api.createOrder as any).mockRejectedValue(apiError);
+
+    // Act: Render component, add product, go to review, and try to submit order
+    renderWithProviders(<OrderCreate />);
+
+    // Wait for products to load
+    await waitFor(() => {
       expect(
-        screen.getByText('Failed to create order. Please try again.'),
+        screen.getByText('Select Products for Your Order'),
       ).toBeInTheDocument();
+    });
+
+    // Add first product
+    const addButtons = screen.getAllByText('Add to Order');
+    fireEvent.click(addButtons[0]);
+
+    // Go to review step
+    const reviewButton = screen.getByRole('button', { name: 'Review Order' });
+    fireEvent.click(reviewButton);
+
+    // Wait for review step to load
+    await waitFor(() => {
+      expect(screen.getByText('Review Your Order')).toBeInTheDocument();
+    });
+
+    // Submit the order
+    const submitButton = screen.getByText('Save Order');
+    fireEvent.click(submitButton);
+
+    // Assert: Error message with Common Error Format is shown
+    await waitFor(() => {
+      expect(screen.getByText('Invalid order data')).toBeInTheDocument();
+      expect(screen.getByText('Order Validation Failed')).toBeInTheDocument();
+      // API errors should have Error ID displayed
+      if (apiError.errorData && apiError.errorData.id) {
+        expect(
+          screen.getByText(`Error ID: ${apiError.errorData.id}`),
+        ).toBeInTheDocument();
+      }
     });
   });
 

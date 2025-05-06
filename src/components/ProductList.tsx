@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { fetchProducts, Product } from '../services/api';
+import { fetchProducts, Product, ApiError } from '../services/api';
+import { ErrorMessage } from '../components/ErrorMessage';
 import './ProductList.css';
 
 // Simple product card component
@@ -50,7 +51,7 @@ function ProductCard({ product }: { product: Product }) {
 export function ProductList() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
 
   useEffect(() => {
     const getProducts = async () => {
@@ -60,7 +61,15 @@ export function ProductList() {
         setProducts(data);
         setError(null);
       } catch (err) {
-        setError('Failed to fetch products. Please try again later.');
+        setError(
+          err instanceof ApiError
+            ? err
+            : new ApiError('Failed to fetch products', 500, {
+                criticality: 'critical',
+                id: '', // NEVER generate IDs in UI - leave empty for client errors
+                detail: 'Failed to fetch products. Please try again later.',
+              }),
+        );
         console.error(err);
       } finally {
         setLoading(false);
@@ -75,7 +84,17 @@ export function ProductList() {
   }
 
   if (error) {
-    return <div className="error">{error}</div>;
+    return (
+      <ErrorMessage
+        message={
+          error.errorData || {
+            criticality: 'critical',
+            id: '', // NEVER generate IDs in UI - leave empty for client errors
+            detail: error.message,
+          }
+        }
+      />
+    );
   }
 
   return (

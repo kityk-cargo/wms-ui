@@ -13,6 +13,7 @@ export function ErrorMessage({ message }: ErrorMessageProps) {
   let displayTitle = '';
   let displayMessage = '';
   let recoverySuggestion = '';
+  let errorId = '';
 
   if (typeof message === 'string') {
     displayMessage = message;
@@ -23,6 +24,7 @@ export function ErrorMessage({ message }: ErrorMessageProps) {
     // Handle optional fields only if they exist
     displayTitle = message.title || '';
     recoverySuggestion = message.recoverySuggestion || '';
+    errorId = message.id || '';
   }
 
   return (
@@ -30,6 +32,7 @@ export function ErrorMessage({ message }: ErrorMessageProps) {
       <div className="error-icon">!</div>
       {displayTitle && <h4 className="error-title">{displayTitle}</h4>}
       <p className="error-message">{displayMessage}</p>
+      {errorId && <p className="error-id">Error ID: {errorId}</p>}
       {recoverySuggestion && (
         <p className="error-recovery">{recoverySuggestion}</p>
       )}

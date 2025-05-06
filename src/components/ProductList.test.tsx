@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ProductList } from './ProductList';
 import * as apiService from '../services/api';
+import { CommonErrorType } from '../types/errors';
 
 /**
  * Tests for the ProductList component
@@ -120,18 +121,28 @@ describe('ProductList Component', () => {
 
     // Assert
     await waitFor(() => {
+      // The error now comes from an ErrorMessage component with common format
       expect(
         screen.getByText('Failed to fetch products. Please try again later.'),
       ).toBeInTheDocument();
+      expect(screen.getByTestId('error-container')).toBeInTheDocument();
+      // Client errors should NOT have Error ID displayed
+      expect(screen.queryByText(/Error ID:/)).not.toBeInTheDocument();
     });
   });
 
   /**
-   * Test that component handles API-specific errors properly
+   * Test that component handles API-specific errors properly with Common Error Format
    */
-  it('should display error message for API-specific errors', async () => {
+  it('should display error message for API-specific errors using Common Error Format', async () => {
     // Arrange
-    const apiError = new apiService.ApiError('API error', 500);
+    const errorData: CommonErrorType = {
+      criticality: 'critical',
+      id: 'api-error-123',
+      detail: 'API server error occurred',
+      title: 'Service Unavailable',
+    };
+    const apiError = new apiService.ApiError('API error', 500, errorData);
     vi.spyOn(apiService, 'fetchProducts').mockRejectedValue(apiError);
 
     // Act
@@ -139,9 +150,13 @@ describe('ProductList Component', () => {
 
     // Assert
     await waitFor(() => {
-      expect(
-        screen.getByText('Failed to fetch products. Please try again later.'),
-      ).toBeInTheDocument();
+      // Look for the error components from the ErrorMessage component
+      expect(screen.getByText(errorData.detail)).toBeInTheDocument();
+      if (errorData.title) {
+        expect(screen.getByText(errorData.title)).toBeInTheDocument();
+      }
+      // Only API errors should have Error IDs displayed
+      expect(screen.getByText(`Error ID: ${errorData.id}`)).toBeInTheDocument();
     });
   });
 
@@ -211,5 +226,25 @@ describe('ProductList Component', () => {
     // This will depend on the locale of the test environment
     // Using a partial match to avoid locale issues in testing environments
     expect(screen.getByText(/4\/15\/2023/)).toBeInTheDocument();
+  });
+
+  /**
+   * Test that component falls back to generic error message when ApiError doesn't have errorData
+   */
+  it('should display generic error message when ApiError has no errorData', async () => {
+    // Arrange
+    const apiError = new apiService.ApiError('Generic API error', 500);
+    vi.spyOn(apiService, 'fetchProducts').mockRejectedValue(apiError);
+
+    // Act
+    render(<ProductList />);
+
+    // Assert
+    await waitFor(() => {
+      expect(screen.getByText('Generic API error')).toBeInTheDocument();
+      expect(screen.getByTestId('error-container')).toBeInTheDocument();
+      // Should not display Error ID for client-side errors
+      expect(screen.queryByText(/Error ID:/)).not.toBeInTheDocument();
+    });
   });
 });
