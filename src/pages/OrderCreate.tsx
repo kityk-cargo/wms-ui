@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchProducts, createOrder } from '../services/api';
+import { fetchProducts, createOrder, ApiError } from '../services/api';
 import {
   Product,
   OrderItemCreate,
   OrderCreate as OrderCreateType,
   Order,
 } from '../types';
+import { ErrorMessage } from '../components/ErrorMessage';
 import { formatCurrency } from '../utils/formatters';
 import './OrderCreate.css';
 
@@ -25,7 +26,7 @@ export function OrderCreate() {
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
 
   // Order data state
   const [selectedProducts, setSelectedProducts] = useState<
@@ -44,7 +45,15 @@ export function OrderCreate() {
         setProducts(data);
         setError(null);
       } catch (err) {
-        setError('Failed to fetch products. Please try again later.');
+        setError(
+          err instanceof ApiError
+            ? err
+            : new ApiError('Failed to fetch products', 500, {
+                criticality: 'critical',
+                id: '', // NEVER generate IDs in UI
+                detail: 'Failed to fetch products',
+              }),
+        );
         console.error(err);
       } finally {
         setLoading(false);
@@ -87,7 +96,15 @@ export function OrderCreate() {
 
       // Check if there are any items
       if (items.length === 0) {
-        setError('Your order must contain at least one product.');
+        // For UI validation errors, use empty id
+        setError(
+          new ApiError('Empty order', 400, {
+            criticality: 'critical',
+            id: '', // NEVER generate IDs in UI
+            detail: 'Your order must contain at least one product.',
+            title: 'Empty Order',
+          }),
+        );
         setSubmitting(false);
         return;
       }
@@ -105,11 +122,34 @@ export function OrderCreate() {
       setCurrentStep(OrderCreationStep.OrderConfirmation);
       setError(null);
     } catch (err) {
-      setError('Failed to create order. Please try again.');
+      setError(
+        err instanceof ApiError
+          ? err
+          : new ApiError('Failed to create order', 500, {
+              criticality: 'critical',
+              id: '', // NEVER generate IDs in UI
+              detail: 'Failed to create order',
+            }),
+      );
       console.error(err);
     } finally {
       setSubmitting(false);
     }
+  };
+
+  // Render error message
+  const renderError = (err: ApiError) => {
+    return (
+      <ErrorMessage
+        message={
+          err.errorData || {
+            criticality: 'critical',
+            id: '', // NEVER generate IDs in UI
+            detail: err.message,
+          }
+        }
+      />
+    );
   };
 
   // Render product selection step
@@ -119,7 +159,7 @@ export function OrderCreate() {
     }
 
     if (error) {
-      return <div className="error">{error}</div>;
+      return renderError(error);
     }
 
     if (products.length === 0) {
@@ -328,7 +368,7 @@ export function OrderCreate() {
           </button>
         </div>
 
-        {error && <div className="error">{error}</div>}
+        {error && renderError(error)}
       </div>
     );
   };
@@ -336,7 +376,15 @@ export function OrderCreate() {
   // Render order confirmation step
   const renderOrderConfirmation = () => {
     if (!orderResponse) {
-      return <div className="error">No order information available.</div>;
+      return (
+        <ErrorMessage
+          message={{
+            criticality: 'critical',
+            id: '', // NEVER generate IDs in UI
+            detail: 'No order information available.',
+          }}
+        />
+      );
     }
 
     return (
