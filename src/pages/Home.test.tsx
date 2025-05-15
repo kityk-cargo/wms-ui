@@ -29,8 +29,12 @@ describe('Home Page', () => {
   ];
 
   const navigationLinks = [
-    { name: 'Create Order', href: '/orders/create', className: 'btn-primary' },
-    { name: 'View Orders', href: '/orders', className: 'btn-secondary' },
+    {
+      name: 'Create Order',
+      href: '/ui/orders/create',
+      className: 'btn-primary',
+    },
+    { name: 'View Orders', href: '/ui/orders', className: 'btn-secondary' },
   ];
 
   /**

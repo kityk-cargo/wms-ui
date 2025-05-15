@@ -417,13 +417,13 @@ export function OrderCreate() {
         <div className="confirmation-actions">
           <button
             className="btn btn-secondary"
-            onClick={() => navigate('/orders')}
+            onClick={() => navigate('/ui/orders')}
           >
             View All Orders
           </button>
           <button
             className="btn btn-primary"
-            onClick={() => navigate(`/orders/${orderResponse.id}`)}
+            onClick={() => navigate(`/ui/orders/${orderResponse.id}`)}
           >
             View Order Details
           </button>

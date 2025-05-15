@@ -10,10 +10,10 @@ export function Home() {
           Manage your inventory, orders, and warehouse operations efficiently
         </p>
         <div className="action-buttons">
-          <Link to="/orders/create" className="btn btn-primary">
+          <Link to="/ui/orders/create" className="btn btn-primary">
             Create Order
           </Link>
-          <Link to="/orders" className="btn btn-secondary">
+          <Link to="/ui/orders" className="btn btn-secondary">
             View Orders
           </Link>
         </div>
