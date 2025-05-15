@@ -17,13 +17,13 @@ export function MainLayout({ children }: MainLayoutProps) {
         <nav className="main-nav">
           <ul>
             <li>
-              <Link to="/">Home</Link>
+              <Link to="/ui">Home</Link>
             </li>
             <li>
-              <Link to="/orders">Orders</Link>
+              <Link to="/ui/orders">Orders</Link>
             </li>
             <li>
-              <Link to="/products">Products</Link>
+              <Link to="/ui/products">Products</Link>
             </li>
           </ul>
         </nav>
