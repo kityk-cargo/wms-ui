@@ -443,6 +443,8 @@ describe('OrderCreate', () => {
     fireEvent.click(viewDetailsButton);
 
     // Assert: Navigate was called with the correct path
-    expect(mockNavigate).toHaveBeenCalledWith(`/orders/${mockSingleOrder.id}`);
+    expect(mockNavigate).toHaveBeenCalledWith(
+      `/ui/orders/${mockSingleOrder.id}`,
+    );
   });
 });

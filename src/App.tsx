@@ -14,11 +14,11 @@ function App() {
       <Router>
         <MainLayout>
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/orders" element={<OrderList />} />
-            <Route path="/orders/create" element={<OrderCreate />} />
-            <Route path="/orders/:id" element={<OrderDetail />} />
-            <Route path="/products" element={<ProductList />} />
+            <Route path="/ui" element={<Home />} />
+            <Route path="/ui/orders" element={<OrderList />} />
+            <Route path="/ui/orders/create" element={<OrderCreate />} />
+            <Route path="/ui/orders/:id" element={<OrderDetail />} />
+            <Route path="/ui/products" element={<ProductList />} />
           </Routes>
         </MainLayout>
       </Router>

@@ -34,7 +34,7 @@ export const OrderList = observer(() => {
     <div className="order-list-page">
       <div className="order-list-header">
         <h1>Orders</h1>
-        <Link to="/orders/create" className="btn btn-primary">
+        <Link to="/ui/orders/create" className="btn btn-primary">
           Create Order
         </Link>
       </div>
@@ -67,7 +67,7 @@ export const OrderList = observer(() => {
                   </td>
                   <td>{formatCurrency(order.totalAmount)}</td>
                   <td>
-                    <Link to={`/orders/${order.id}`} className="btn-icon">
+                    <Link to={`/ui/orders/${order.id}`} className="btn-icon">
                       View
                     </Link>
                   </td>

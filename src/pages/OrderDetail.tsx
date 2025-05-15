@@ -46,7 +46,7 @@ export const OrderDetail = observer(() => {
           <h1>Order #{order.id}</h1>
         </div>
         <div className="order-actions">
-          <Link to="/orders" className="btn btn-secondary">
+          <Link to="/ui/orders" className="btn btn-secondary">
             Back to Orders
           </Link>
         </div>
