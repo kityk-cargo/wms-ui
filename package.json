@@ -14,7 +14,7 @@
     "test:pact": "vitest run src/services/pact && node scripts/organize-pacts.js",
     "pact:organize": "node scripts/organize-pacts.js",
     "mock-server": "node mock-server.js",
-    "pact-mock-server": "node pact-mock-server.cjs"
+    "pact-mock-server": "node pact-mock-server.js"
   },
   "dependencies": {
     "mobx": "^6.13.7",
