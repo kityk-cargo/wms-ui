@@ -120,6 +120,16 @@ const ProviderStateManager = {
 
     // If current states are set, try to match them (ANY logic)
     if (this.currentStates.length > 0) {
+      // If path scoping is active, check if tis route matches the scoped path
+      if (this.currentPath) {
+        const [, routePath] = routeKey.split(":");
+        if (!routePath.startsWith(this.currentPath)) {
+          // Route doesn't match scoped path, skip state-based matching
+          return this._getDefaultRoute(options);
+        }
+      }
+
+      // Find route that matches any of the current states
       for (const currentState of this.currentStates) {
         const match = options.find((option) =>
           option.states.includes(currentState),
@@ -128,6 +138,16 @@ const ProviderStateManager = {
       }
     }
 
+    return this._getDefaultRoute(options);
+  },
+
+  /**
+   * Gets the default route configuration (no provider state, prefer 2xx status codes)
+   * @param {Array} options - Available route options
+   * @returns {Object} Route configuration
+   * @private
+   */
+  _getDefaultRoute(options) {
     // Default behavior: prefer no provider state, then 2xx status codes
     const noStateOptions = options.filter(
       (option) => option.states.length === 0,
@@ -546,7 +566,7 @@ const ServerHandler = {
         res.writeHead(400, { "Content-Type": CONFIG.defaultContentType });
         res.end(
           JSON.stringify({
-            error: "Invalid JSON in request body" + error,
+            error: "Invalid JSON in request body" + error.message,
             availableStates: ProviderStateManager.getAvailableStates(),
           }),
         );
