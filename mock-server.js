@@ -41,30 +41,28 @@ const CONFIG = {
 // ============================================================================
 
 const ProviderStateManager = {
-  // Current active provider states
+  // Current active provider states and path restriction
   currentStates: [],
-  
-  // Available provider states found in contracts
+  currentPath: null,
+
+  // Available states and route mappings
   availableStates: new Set(),
-  
-  // Interactions grouped by route and provider state
   stateRoutes: new Map(),
 
   /**
    * Sets the current provider states
    * @param {Array<string>} states - Array of state names to set
    * @param {string} [path] - Optional path to limit scope
-   * @returns {Object} Result object with success status and any warnings
+   * @returns {Object} Result with success status and warnings
    */
   setStates(states, path = null) {
     const warnings = [];
-    const validStates = [];
-
-    states.forEach(state => {
+    const validStates = states.filter((state) => {
       if (this.availableStates.has(state)) {
-        validStates.push(state);
+        return true;
       } else {
         warnings.push(`${state} not found in contracts`);
+        return false;
       }
     });
 
@@ -72,17 +70,16 @@ const ProviderStateManager = {
     this.currentPath = path;
 
     return {
-      success: true,
       warnings,
       validStates,
-      availableStates: Array.from(this.availableStates)
+      availableStates: Array.from(this.availableStates),
     };
   },
 
   /**
    * Resets provider states to default behavior
    */
-  resetStates() {
+  reset() {
     this.currentStates = [];
     this.currentPath = null;
   },
@@ -96,29 +93,20 @@ const ProviderStateManager = {
   },
 
   /**
-   * Adds a provider state from contract processing
-   * @param {string} state - State name to add
-   */
-  addAvailableState(state) {
-    this.availableStates.add(state);
-  },
-
-  /**
-   * Stores an interaction with its provider states for route matching
+   * Adds provider states from interaction and stores route mapping
    * @param {string} routeKey - Route key (METHOD:path)
    * @param {Object} interaction - Interaction object
    * @param {Object} routeConfig - Route configuration
    */
-  storeStateRoute(routeKey, interaction, routeConfig) {
+  addInteraction(routeKey, interaction, routeConfig) {
+    const states = this._extractStates(interaction);
+    states.forEach((state) => this.availableStates.add(state));
+
     if (!this.stateRoutes.has(routeKey)) {
       this.stateRoutes.set(routeKey, []);
     }
-    
-    this.stateRoutes.get(routeKey).push({
-      interaction,
-      routeConfig,
-      states: this._extractStatesFromInteraction(interaction)
-    });
+
+    this.stateRoutes.get(routeKey).push({ routeConfig, states });
   },
 
   /**
@@ -127,18 +115,40 @@ const ProviderStateManager = {
    * @returns {Object|null} Route configuration or null if not found
    */
   getMatchingRoute(routeKey) {
-    const routeOptions = this.stateRoutes.get(routeKey);
-    if (!routeOptions || routeOptions.length === 0) {
-      return null;
-    }
+    const options = this.stateRoutes.get(routeKey);
+    if (!options?.length) return null;
 
-    // If we have current states set, try to match them
+    // If current states are set, try to match them (ANY logic)
     if (this.currentStates.length > 0) {
-      return this._findStateBasedMatch(routeOptions);
+      for (const currentState of this.currentStates) {
+        const match = options.find((option) =>
+          option.states.includes(currentState),
+        );
+        if (match) return match.routeConfig;
+      }
     }
 
-    // Default behavior: prefer no provider state, then 2xx codes
-    return this._findDefaultMatch(routeOptions);
+    // Default behavior: prefer no provider state, then 2xx status codes
+    const noStateOptions = options.filter(
+      (option) => option.states.length === 0,
+    );
+    if (noStateOptions.length > 0) {
+      const twoxxOption = noStateOptions.find(
+        (option) =>
+          option.routeConfig.status >= 200 && option.routeConfig.status < 300,
+      );
+      return twoxxOption
+        ? twoxxOption.routeConfig
+        : noStateOptions[0].routeConfig;
+    }
+
+    // If no no-state options, pick first 2xx from any option
+    const twoxxOption = options.find(
+      (option) =>
+        option.routeConfig.status >= 200 && option.routeConfig.status < 300,
+    );
+
+    return twoxxOption ? twoxxOption.routeConfig : options[0].routeConfig;
   },
 
   /**
@@ -147,74 +157,21 @@ const ProviderStateManager = {
    * @returns {Array<string>} Array of state names
    * @private
    */
-  _extractStatesFromInteraction(interaction) {
+  _extractStates(interaction) {
     const states = [];
-    
-    // Handle providerState (string)
+
     if (interaction.providerState) {
       states.push(interaction.providerState);
     }
-    
-    // Handle providerStates (array of objects with name field)
-    if (interaction.providerStates && Array.isArray(interaction.providerStates)) {
-      interaction.providerStates.forEach(stateObj => {
-        if (stateObj.name) {
-          states.push(stateObj.name);
-        }
+
+    if (interaction.providerStates?.length) {
+      interaction.providerStates.forEach((stateObj) => {
+        if (stateObj.name) states.push(stateObj.name);
       });
     }
-    
+
     return states;
   },
-
-  /**
-   * Finds a state-based match for current provider states
-   * @param {Array} routeOptions - Available route options
-   * @returns {Object} Route configuration
-   * @private
-   */
-  _findStateBasedMatch(routeOptions) {
-    // Look for interactions that match ANY of our current states
-    for (const currentState of this.currentStates) {
-      const match = routeOptions.find(option => 
-        option.states.includes(currentState)
-      );
-      if (match) {
-        return match.routeConfig;
-      }
-    }
-
-    // If no state match found, fall back to default behavior
-    return this._findDefaultMatch(routeOptions);
-  },
-
-  /**
-   * Finds the default match (no provider state, prefer 2xx codes)
-   * @param {Array} routeOptions - Available route options
-   * @returns {Object} Route configuration
-   * @private
-   */
-  _findDefaultMatch(routeOptions) {
-    // First, try to find interactions with no provider state
-    const noStateOptions = routeOptions.filter(option => 
-      option.states.length === 0
-    );
-    
-    if (noStateOptions.length > 0) {
-      // Prefer 2xx status codes
-      const twoxxOption = noStateOptions.find(option => 
-        option.routeConfig.status >= 200 && option.routeConfig.status < 300
-      );
-      return twoxxOption ? twoxxOption.routeConfig : noStateOptions[0].routeConfig;
-    }
-
-    // If no no-state options, pick first 2xx from any option
-    const twoxxOption = routeOptions.find(option => 
-      option.routeConfig.status >= 200 && option.routeConfig.status < 300
-    );
-    
-    return twoxxOption ? twoxxOption.routeConfig : routeOptions[0].routeConfig;
-  }
 };
 
 // ============================================================================
@@ -268,17 +225,23 @@ const Logger = {
    */
   logProviderStateHelp() {
     const availableStates = ProviderStateManager.getAvailableStates();
-    
+
     console.log("-------------------------------------------");
     console.log("Provider State Management:");
-    console.log('- Set state: POST /api/mock-server/state {"state": "state_name"}');
-    console.log('- Set multiple: POST /api/mock-server/state {"states": ["state1", "state2"]}');
-    console.log('- Limit scope: POST /api/mock-server/state {"state": "state_name", "path": "/api/path"}');
-    console.log('- Reset states: POST /api/mock-server/reset');
-    
+    console.log(
+      '- Set state: POST /api/mock-server/state {"state": "state_name"}',
+    );
+    console.log(
+      '- Set multiple: POST /api/mock-server/state {"states": ["state1", "state2"]}',
+    );
+    console.log(
+      '- Limit scope: POST /api/mock-server/state {"state": "state_name", "path": "/api/path"}',
+    );
+    console.log("- Reset states: POST /api/mock-server/reset");
+
     if (availableStates.length > 0) {
       console.log("Available provider states:");
-      availableStates.forEach(state => {
+      availableStates.forEach((state) => {
         console.log(`  - "${state}"`);
       });
     }
@@ -428,17 +391,14 @@ const RouteBuilder = {
 
     // Store in both old format (for backward compatibility) and new state-aware format
     routes[routeKey] = routeConfig;
-    
-    // Extract and store provider states
-    const states = ProviderStateManager._extractStatesFromInteraction(interaction);
-    states.forEach(state => ProviderStateManager.addAvailableState(state));
-    
-    // Store interaction with states for route matching
-    ProviderStateManager.storeStateRoute(routeKey, interaction, routeConfig);
+
+    // Add interaction to provider state manager
+    ProviderStateManager.addInteraction(routeKey, interaction, routeConfig);
 
     console.log(`Added route: ${method} ${path}`);
+    const states = ProviderStateManager._extractStates(interaction);
     if (states.length > 0) {
-      console.log(`  Provider states: ${states.join(', ')}`);
+      console.log(`  Provider states: ${states.join(", ")}`);
     }
     console.log("Route details:", {
       method,
@@ -494,16 +454,12 @@ const ServerHandler = {
 
     const routeKey = `${req.method}:${req.url}`;
 
-    // Try state-aware route matching first
+    // Try state-aware route matching first, then fall back to original routes
     const stateAwareRoute = ProviderStateManager.getMatchingRoute(routeKey);
-    if (stateAwareRoute) {
-      this._handleFoundRoute(req, res, stateAwareRoute);
-      return;
-    }
+    const routeConfig = stateAwareRoute || routes[routeKey];
 
-    // Fall back to original route matching for backward compatibility
-    if (routes[routeKey]) {
-      this._handleFoundRoute(req, res, routes[routeKey]);
+    if (routeConfig) {
+      this._handleFoundRoute(req, res, routeConfig);
     } else {
       this._handleNotFoundRoute(req, res, routeKey);
     }
@@ -516,7 +472,10 @@ const ServerHandler = {
    * @private
    */
   _isStateManagementAPI(req) {
-    return req.url === '/api/mock-server/state' || req.url === '/api/mock-server/reset';
+    return (
+      req.url === "/api/mock-server/state" ||
+      req.url === "/api/mock-server/reset"
+    );
   },
 
   /**
@@ -526,13 +485,13 @@ const ServerHandler = {
    * @private
    */
   _handleStateManagementAPI(req, res) {
-    if (req.url === '/api/mock-server/state' && req.method === 'POST') {
+    if (req.url === "/api/mock-server/state" && req.method === "POST") {
       this._handleSetState(req, res);
-    } else if (req.url === '/api/mock-server/reset' && req.method === 'POST') {
+    } else if (req.url === "/api/mock-server/reset" && req.method === "POST") {
       this._handleResetState(req, res);
     } else {
-      res.writeHead(405, { 'Content-Type': CONFIG.defaultContentType });
-      res.end(JSON.stringify({ error: 'Method not allowed' }));
+      res.writeHead(405, { "Content-Type": CONFIG.defaultContentType });
+      res.end(JSON.stringify({ error: "Method not allowed" }));
     }
   },
 
@@ -551,48 +510,46 @@ const ServerHandler = {
         // Handle both single state and multiple states
         if (requestData.state) {
           states = [requestData.state];
-        } else if (requestData.states && Array.isArray(requestData.states)) {
+        } else if (requestData.states?.length) {
           states = requestData.states;
         } else {
-          res.writeHead(400, { 'Content-Type': CONFIG.defaultContentType });
-          res.end(JSON.stringify({ 
-            error: 'Invalid request format. Expected {"state": "name"} or {"states": ["name1", "name2"]}' 
-          }));
+          res.writeHead(400, { "Content-Type": CONFIG.defaultContentType });
+          res.end(
+            JSON.stringify({
+              error:
+                'Invalid request format. Expected {"state": "name"} or {"states": ["name1", "name2"]}',
+            }),
+          );
           return;
         }
 
         const result = ProviderStateManager.setStates(states, requestData.path);
-        
-        if (result.warnings.length > 0) {
-          res.writeHead(200, { 'Content-Type': CONFIG.defaultContentType });
-          res.end(JSON.stringify({
-            message: 'Provider state(s) set with warnings',
+
+        const responseBody = {
+          message: `Provider state(s) set ${result.warnings.length > 0 ? "with warnings" : "successfully"}`,
+          validStates: result.validStates,
+          ...(result.warnings.length > 0 && {
             warnings: result.warnings,
-            validStates: result.validStates,
-            availableStates: result.availableStates
-          }));
-        } else {
-          res.writeHead(200, { 'Content-Type': CONFIG.defaultContentType });
-          res.end(JSON.stringify({
-            message: 'Provider state(s) set successfully',
-            validStates: result.validStates
-          }));
-        }
+            availableStates: result.availableStates,
+          }),
+        };
 
-        console.log(`Provider states set: ${result.validStates.join(', ')}`);
-        if (requestData.path) {
+        res.writeHead(200, { "Content-Type": CONFIG.defaultContentType });
+        res.end(JSON.stringify(responseBody));
+
+        console.log(`Provider states set: ${result.validStates.join(", ")}`);
+        if (requestData.path)
           console.log(`Limited to path: ${requestData.path}`);
-        }
-        if (result.warnings.length > 0) {
-          console.log(`Warnings: ${result.warnings.join(', ')}`);
-        }
-
+        if (result.warnings.length > 0)
+          console.log(`Warnings: ${result.warnings.join(", ")}`);
       } catch (error) {
-        res.writeHead(400, { 'Content-Type': CONFIG.defaultContentType });
-        res.end(JSON.stringify({ 
-          error: 'Invalid JSON in request body',
-          availableStates: ProviderStateManager.getAvailableStates()
-        }));
+        res.writeHead(400, { "Content-Type": CONFIG.defaultContentType });
+        res.end(
+          JSON.stringify({
+            error: "Invalid JSON in request body" + error,
+            availableStates: ProviderStateManager.getAvailableStates(),
+          }),
+        );
       }
     });
   },
@@ -604,14 +561,16 @@ const ServerHandler = {
    * @private
    */
   _handleResetState(req, res) {
-    ProviderStateManager.resetStates();
-    
-    res.writeHead(200, { 'Content-Type': CONFIG.defaultContentType });
-    res.end(JSON.stringify({
-      message: 'Provider states reset to default behavior'
-    }));
+    ProviderStateManager.reset();
 
-    console.log('Provider states reset to default behavior');
+    res.writeHead(200, { "Content-Type": CONFIG.defaultContentType });
+    res.end(
+      JSON.stringify({
+        message: "Provider states reset to default behavior",
+      }),
+    );
+
+    console.log("Provider states reset to default behavior");
   },
 
   /**
@@ -621,11 +580,11 @@ const ServerHandler = {
    * @private
    */
   _parseRequestBody(req, callback) {
-    let body = '';
-    req.on('data', chunk => {
+    let body = "";
+    req.on("data", (chunk) => {
       body += chunk.toString();
     });
-    req.on('end', () => {
+    req.on("end", () => {
       callback(body);
     });
   },

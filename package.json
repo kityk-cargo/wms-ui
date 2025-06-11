@@ -12,6 +12,7 @@
     "test": "vitest run --coverage",
     "test:watch": "vitest",
     "test:pact": "vitest run src/services/pact && node scripts/organize-pacts.js",
+    "test:mock-server": "vitest run src/test/mock-server-states.test.ts",
     "pact:organize": "node scripts/organize-pacts.js",
     "mock-server": "node mock-server.js",
     "pact-mock-server": "node pact-mock-server.js"
