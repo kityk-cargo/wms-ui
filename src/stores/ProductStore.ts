@@ -1,5 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { fetchProducts, fetchProduct, Product } from '../services/api';
+import { CommonErrorType } from '../types/errors';
+import { convertToCommonError } from '../utils/errorHelpers';
 import { RootStore } from './RootStore';
 
 /**
@@ -10,7 +12,7 @@ export class ProductStore {
   products: Product[] = [];
   currentProduct: Product | null = null;
   loading: boolean = false;
-  error: string | null = null;
+  error: string | CommonErrorType | null = null;
 
   // Root store reference
   rootStore: RootStore;
@@ -41,7 +43,10 @@ export class ProductStore {
       });
     } catch (err) {
       runInAction(() => {
-        this.error = 'Failed to fetch products. Please try again later.';
+        this.error = convertToCommonError(
+          err,
+          'Failed to fetch products. Please try again later.',
+        );
         this.loading = false;
       });
       console.error(err);
@@ -64,7 +69,10 @@ export class ProductStore {
       });
     } catch (err) {
       runInAction(() => {
-        this.error = `Failed to fetch product with ID ${id}. Please try again later.`;
+        this.error = convertToCommonError(
+          err,
+          `Failed to fetch product with ID ${id}. Please try again later.`,
+        );
         this.loading = false;
       });
       console.error(err);
@@ -81,7 +89,7 @@ export class ProductStore {
   /**
    * Set error message
    */
-  setError = (error: string | null): void => {
+  setError = (error: string | CommonErrorType | null): void => {
     this.error = error;
   };
 
