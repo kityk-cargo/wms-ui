@@ -75,9 +75,11 @@ describe('ProductStore', () => {
       // Assert
       expect(productStore.products).toEqual([]);
       expect(productStore.loading).toBe(false);
-      expect(productStore.error).toBe(
-        'Failed to fetch products. Please try again later.',
-      );
+      expect(productStore.error).toEqual({
+        criticality: 'critical',
+        id: '',
+        detail: 'Failed to fetch products. Please try again later.',
+      });
     });
 
     it('should load a single product by ID', async () => {
@@ -108,9 +110,11 @@ describe('ProductStore', () => {
       // Assert
       expect(productStore.currentProduct).toBeNull();
       expect(productStore.loading).toBe(false);
-      expect(productStore.error).toBe(
-        `Failed to fetch product with ID ${productId}. Please try again later.`,
-      );
+      expect(productStore.error).toEqual({
+        criticality: 'critical',
+        id: '',
+        detail: `Failed to fetch product with ID ${productId}. Please try again later.`,
+      });
     });
   });
 
@@ -167,7 +171,7 @@ describe('ProductStore', () => {
       // Act - Start the API call but don't await it yet
       const loadPromise = productStore.loadProducts();
 
-      // Assert - Check loading state is true during the call
+      // Assert - loading state should be true during call
       expect(productStore.loading).toBe(true);
 
       // Resolve the API call
