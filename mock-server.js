@@ -32,108 +32,195 @@ const __dirname = path.dirname(__filename);
 // Configuration constants
 const CONFIG = {
   port: process.env.MOCK_SERVER_PORT || 30080,
-  pactsDirectory: path.join(__dirname, "pacts"),
-  defaultContentType: "application/json",
+  pactsDir: path.join(__dirname, "pacts"),
+  contentType: "application/json",
 };
 
 // ============================================================================
-// PROVIDER STATE MANAGEMENT
+// CUSTOM ROUTES SECTION
+// ============================================================================
+/**
+ * Custom routes that are not present in Pact contracts.
+ * These are useful for quick experimentation, reproducing bugs,
+ * or testing scenarios not covered by official contracts.
+ * 
+ * WARNING: Custom routes should not conflict with existing contract routes
+ * for the same state. Server will fail to start if conflicts are detected.
+ * 
+ * Format:
+ * {
+ *   method: "GET|POST|PUT|DELETE",
+ *   path: "/api/path",
+ *   state: "provider state name", // optional, for state-based responses
+ *   response: {
+ *     status: number,
+ *     headers: object,
+ *     body: any
+ *   }
+ * }
+ */
+const CUSTOM_ROUTES = [
+  // Example: Products error route
+  {
+    method: "GET",
+    path: "/api/v1/products",
+    state: "get products error out",
+    response: {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+      body: {
+        error: "Internal Server Error",
+        message: "Products service is currently unavailable",
+        code: "PRODUCTS_SERVICE_ERROR"
+      }
+    }
+  },
+  
+  // Add more custom routes here as needed
+  // {
+  //   method: "POST",
+  //   path: "/api/v1/orders",
+  //   state: "order creation fails",
+  //   response: {
+  //     status: 422,
+  //     headers: { "Content-Type": "application/json" },
+  //     body: { error: "Validation failed", details: ["Invalid customer ID"] }
+  //   }
+  // }
+];
+
+// ============================================================================
+// UTILITY FUNCTIONS
 // ============================================================================
 
-const ProviderStateManager = {
-  // Current active provider states and path restriction
+const createRouteKey = (method, path) => `${method.toUpperCase()}:${path}`;
+
+const createRouteConfig = (response) => ({
+  status: response.status || 200,
+  headers: response.headers || { "Content-Type": CONFIG.contentType },
+  body: response.body,
+});
+
+const findSuccessRoute = (options) => 
+  options.find(opt => opt.routeConfig.status >= 200 && opt.routeConfig.status < 300);
+
+const findNoStateRoutes = (options) => 
+  options.filter(opt => opt.states.length === 0);
+
+const extractStates = (interaction) => {
+  const states = [];
+  
+  if (interaction.providerState) states.push(interaction.providerState);
+  if (interaction.providerStates?.length) {
+    interaction.providerStates.forEach(stateObj => {
+      if (stateObj.name) states.push(stateObj.name);
+    });
+  }
+  if (interaction.state) states.push(interaction.state);
+  
+  return states;
+};
+
+// ============================================================================
+// STATE MANAGEMENT
+// ============================================================================
+
+const StateManager = {
   currentStates: [],
   currentPath: null,
-
-  // Available states and route mappings
   availableStates: new Set(),
   stateRoutes: new Map(),
+  customStates: new Set(),
+  contractStates: new Set(),
 
-  /**
-   * Sets the current provider states
-   * @param {Array<string>} states - Array of state names to set
-   * @param {string} [path] - Optional path to limit scope
-   * @returns {Object} Result with success status and warnings
-   */
   setStates(states, path = null) {
     const warnings = [];
-    const validStates = states.filter((state) => {
-      if (this.availableStates.has(state)) {
-        return true;
-      } else {
-        warnings.push(`${state} not found in contracts`);
-        return false;
-      }
+    const validStates = states.filter(state => {
+      if (this.availableStates.has(state)) return true;
+      warnings.push(`${state} not found in contracts or custom routes`);
+      return false;
     });
 
     this.currentStates = validStates;
     this.currentPath = path;
 
-    return {
-      warnings,
-      validStates,
-      availableStates: Array.from(this.availableStates),
-    };
+    return { warnings, validStates, availableStates: Array.from(this.availableStates) };
   },
 
-  /**
-   * Resets provider states to default behavior
-   */
   reset() {
     this.currentStates = [];
     this.currentPath = null;
   },
 
-  /**
-   * Gets all available provider states
-   * @returns {Array<string>} Array of available state names
-   */
   getAvailableStates() {
     return Array.from(this.availableStates);
   },
 
-  /**
-   * Adds provider states from interaction and stores route mapping
-   * @param {string} routeKey - Route key (METHOD:path)
-   * @param {Object} interaction - Interaction object
-   * @param {Object} routeConfig - Route configuration
-   */
-  addInteraction(routeKey, interaction, routeConfig) {
-    const states = this._extractStates(interaction);
-    states.forEach((state) => this.availableStates.add(state));
+  addRoute(routeKey, interaction, routeConfig, isCustom = false) {
+    const states = extractStates(interaction);
+    
+    states.forEach(state => {
+      this.availableStates.add(state);
+      if (isCustom) this.customStates.add(state);
+      else this.contractStates.add(state);
+    });
 
     if (!this.stateRoutes.has(routeKey)) {
       this.stateRoutes.set(routeKey, []);
     }
 
-    this.stateRoutes.get(routeKey).push({ routeConfig, states });
+    this.stateRoutes.get(routeKey).push({ routeConfig, states, isCustom });
   },
 
-  /**
-   * Finds the best matching route configuration based on current provider states
-   * @param {string} routeKey - Route key to match
-   * @returns {Object|null} Route configuration or null if not found
-   */
-  getMatchingRoute(routeKey) {
+  validateNoConflicts() {
+    const conflicts = [];
+    
+    for (const [routeKey, options] of this.stateRoutes.entries()) {
+      const customOptions = options.filter(opt => opt.isCustom);
+      const contractOptions = options.filter(opt => !opt.isCustom);
+      
+      if (customOptions.length > 0 && contractOptions.length > 0) {
+        for (const customOpt of customOptions) {
+          for (const contractOpt of contractOptions) {
+            const customStates = new Set(customOpt.states);
+            const contractStates = new Set(contractOpt.states);
+            
+            const overlap = [...customStates].some(state => contractStates.has(state));
+            
+            if (overlap) {
+              conflicts.push({
+                route: routeKey,
+                conflictingStates: [...customStates].filter(state => contractStates.has(state))
+              });
+            }
+          }
+        }
+      }
+    }
+    
+    if (conflicts.length > 0) {
+      const errorMsg = conflicts.map(conflict => 
+        `Route ${conflict.route} has conflicting states: ${conflict.conflictingStates.join(', ')}`
+      ).join('\n');
+      
+      throw new Error(`Custom route conflicts detected:\n${errorMsg}\n\nCustom routes cannot use the same state as contract routes for the same endpoint.`);
+    }
+  },
+
+  findRoute(routeKey) {
     const options = this.stateRoutes.get(routeKey);
     if (!options?.length) return null;
 
-    // If current states are set, try to match them (ANY logic)
     if (this.currentStates.length > 0) {
-      // If path scoping is active, check if tis route matches the scoped path
       if (this.currentPath) {
         const [, routePath] = routeKey.split(":");
         if (!routePath.startsWith(this.currentPath)) {
-          // Route doesn't match scoped path, skip state-based matching
           return this._getDefaultRoute(options);
         }
       }
 
-      // Find route that matches any of the current states
       for (const currentState of this.currentStates) {
-        const match = options.find((option) =>
-          option.states.includes(currentState),
-        );
+        const match = options.find(option => option.states.includes(currentState));
         if (match) return match.routeConfig;
       }
     }
@@ -141,172 +228,112 @@ const ProviderStateManager = {
     return this._getDefaultRoute(options);
   },
 
-  /**
-   * Gets the default route configuration (no provider state, prefer 2xx status codes)
-   * @param {Array} options - Available route options
-   * @returns {Object} Route configuration
-   * @private
-   */
   _getDefaultRoute(options) {
-    // Default behavior: prefer no provider state, then 2xx status codes
-    const noStateOptions = options.filter(
-      (option) => option.states.length === 0,
-    );
-    if (noStateOptions.length > 0) {
-      const twoxxOption = noStateOptions.find(
-        (option) =>
-          option.routeConfig.status >= 200 && option.routeConfig.status < 300,
-      );
-      return twoxxOption
-        ? twoxxOption.routeConfig
-        : noStateOptions[0].routeConfig;
+    const contractOptions = options.filter(opt => !opt.isCustom);
+    const customOptions = options.filter(opt => opt.isCustom);
+    
+    // Try contract routes first
+    if (contractOptions.length > 0) {
+      const noStateOptions = findNoStateRoutes(contractOptions);
+      if (noStateOptions.length > 0) {
+        return findSuccessRoute(noStateOptions)?.routeConfig || noStateOptions[0].routeConfig;
+      }
+      
+      const successRoute = findSuccessRoute(contractOptions);
+      if (successRoute) return successRoute.routeConfig;
+    }
+    
+    // Fall back to custom routes
+    if (customOptions.length > 0) {
+      const noStateOptions = findNoStateRoutes(customOptions);
+      if (noStateOptions.length > 0) {
+        return findSuccessRoute(noStateOptions)?.routeConfig || noStateOptions[0].routeConfig;
+      }
+      
+      const successRoute = findSuccessRoute(customOptions);
+      if (successRoute) return successRoute.routeConfig;
     }
 
-    // If no no-state options, pick first 2xx from any option
-    const twoxxOption = options.find(
-      (option) =>
-        option.routeConfig.status >= 200 && option.routeConfig.status < 300,
-    );
-
-    return twoxxOption ? twoxxOption.routeConfig : options[0].routeConfig;
-  },
-
-  /**
-   * Extracts provider states from an interaction
-   * @param {Object} interaction - Pact interaction object
-   * @returns {Array<string>} Array of state names
-   * @private
-   */
-  _extractStates(interaction) {
-    const states = [];
-
-    if (interaction.providerState) {
-      states.push(interaction.providerState);
-    }
-
-    if (interaction.providerStates?.length) {
-      interaction.providerStates.forEach((stateObj) => {
-        if (stateObj.name) states.push(stateObj.name);
-      });
-    }
-
-    return states;
+    return options[0].routeConfig;
   },
 };
 
 // ============================================================================
-// LOGGING UTILITIES
+// LOGGING
 // ============================================================================
 
 const Logger = {
-  /**
-   * Logs server configuration details
-   */
   logConfig() {
     console.log("Configuration:");
-    console.log(
-      "- Port:",
-      CONFIG.port,
-      process.env.MOCK_SERVER_PORT ? "(from .env)" : "(default)",
-    );
-    console.log("- Pacts directory:", CONFIG.pactsDirectory);
+    console.log("- Port:", CONFIG.port, process.env.MOCK_SERVER_PORT ? "(from .env)" : "(default)");
+    console.log("- Pacts directory:", CONFIG.pactsDir);
+    console.log("- Custom routes defined:", CUSTOM_ROUTES.length);
   },
 
-  /**
-   * Logs information about loaded contracts and routes
-   * @param {Array} contracts - Loaded contract objects
-   * @param {Object} routes - Generated route map
-   */
-  logServerStart(contracts, routes) {
-    console.log("Starting mock server seeded from Pact contracts...");
-    console.log(`Looking for Pact contracts in: ${CONFIG.pactsDirectory}`);
+  logServerStart(contracts, routes, customRouteCount) {
+    console.log("Starting mock server with Pact contracts and custom routes...");
     console.log(`Loaded ${contracts.length} Pact contracts`);
-    console.log(
-      `Created ${Object.keys(routes).length} routes from Pact interactions`,
-    );
+    console.log(`Added ${customRouteCount} custom routes`);
+    console.log(`Created ${Object.keys(routes).length} total routes`);
   },
 
-  /**
-   * Logs server startup success and available routes
-   * @param {Object} routes - Generated route map
-   */
   logServerReady(routes) {
     console.log(`Mock server running at http://localhost:${CONFIG.port}`);
     console.log("Use Ctrl+C to stop the server");
     console.log("-------------------------------------------");
     console.log("Available routes:");
-    Object.keys(routes).forEach((route) => {
-      console.log(`- ${route}`);
-    });
+    Object.keys(routes).forEach(route => console.log(`- ${route}`));
   },
 
-  /**
-   * Logs provider state management help
-   */
-  logProviderStateHelp() {
-    const availableStates = ProviderStateManager.getAvailableStates();
+  logStateHelp() {
+    const contractStates = Array.from(StateManager.contractStates);
+    const customStates = Array.from(StateManager.customStates);
 
     console.log("-------------------------------------------");
     console.log("Provider State Management:");
-    console.log(
-      '- Set state: POST /api/mock-server/state {"state": "state_name"}',
-    );
-    console.log(
-      '- Set multiple: POST /api/mock-server/state {"states": ["state1", "state2"]}',
-    );
-    console.log(
-      '- Limit scope: POST /api/mock-server/state {"state": "state_name", "path": "/api/path"}',
-    );
+    console.log('- Set state: POST /api/mock-server/state {"state": "state_name"}');
+    console.log('- Set multiple: POST /api/mock-server/state {"states": ["state1", "state2"]}');
+    console.log('- Limit scope: POST /api/mock-server/state {"state": "state_name", "path": "/api/path"}');
     console.log("- Reset states: POST /api/mock-server/reset");
 
-    if (availableStates.length > 0) {
-      console.log("Available provider states:");
-      availableStates.forEach((state) => {
-        console.log(`  - "${state}"`);
-      });
+    if (contractStates.length > 0) {
+      console.log("Contract states:");
+      contractStates.forEach(state => console.log(`  - "${state}"`));
+    }
+    
+    if (customStates.length > 0) {
+      console.log("Custom states:");
+      customStates.forEach(state => console.log(`  - "${state}"`));
     }
     console.log("-------------------------------------------");
   },
 
-  /**
-   * Logs individual requests and responses
-   * @param {string} method - HTTP method
-   * @param {string} url - Request URL
-   * @param {number} status - Response status code
-   * @param {boolean} found - Whether the route was found
-   */
-  logRequest(method, url, status, found) {
+  logRequest(method, url, status, found, isCustom = false) {
     console.log(`${method} ${url}`);
     if (found) {
-      console.log(
-        `Responded with status ${status} and data from Pact contract`,
-      );
+      const source = isCustom ? "custom route" : "Pact contract";
+      console.log(`Responded with status ${status} from ${source}`);
     } else {
-      console.log(`Route not found in Pact contracts: ${method}:${url}`);
+      console.log(`Route not found: ${method}:${url}`);
     }
   },
 };
 
 // ============================================================================
-// CONTRACT HANDLING
+// CONTRACT LOADING
 // ============================================================================
 
 const ContractLoader = {
-  /**
-   * Loads all Pact contracts from the contracts directory
-   * @returns {Array} Array of parsed contract objects
-   */
   loadContracts() {
     const contracts = [];
 
     try {
-      const providerDirs = fs.readdirSync(CONFIG.pactsDirectory);
+      const providerDirs = fs.readdirSync(CONFIG.pactsDir);
 
-      providerDirs.forEach((providerDir) => {
-        const providerPath = path.join(CONFIG.pactsDirectory, providerDir);
-
+      providerDirs.forEach(providerDir => {
+        const providerPath = path.join(CONFIG.pactsDir, providerDir);
         if (fs.statSync(providerPath).isDirectory()) {
-          this._loadContractsFromProvider(providerPath, providerDir, contracts);
+          this._loadFromProvider(providerPath, providerDir, contracts);
         }
       });
     } catch (error) {
@@ -316,49 +343,26 @@ const ContractLoader = {
     return contracts;
   },
 
-  /**
-   * Loads contract files from a specific provider directory
-   * @param {string} providerPath - Path to provider directory
-   * @param {string} providerDir - Name of provider directory
-   * @param {Array} contracts - Array to append loaded contracts to
-   * @private
-   */
-  _loadContractsFromProvider(providerPath, providerDir, contracts) {
+  _loadFromProvider(providerPath, providerDir, contracts) {
     try {
       const files = fs.readdirSync(providerPath);
 
-      files.forEach((file) => {
+      files.forEach(file => {
         if (file.endsWith(".json")) {
-          this._loadContractFile(
-            path.join(providerPath, file),
-            providerDir,
-            file,
-            contracts,
-          );
+          this._loadContractFile(path.join(providerPath, file), providerDir, file, contracts);
         }
       });
     } catch (error) {
-      console.error(
-        `Error reading provider directory ${providerPath}:`,
-        error.message,
-      );
+      console.error(`Error reading provider directory ${providerPath}:`, error.message);
     }
   },
 
-  /**
-   * Loads and parses an individual contract file
-   * @param {string} contractPath - Path to contract file
-   * @param {string} providerDir - Name of provider directory
-   * @param {string} file - Name of contract file
-   * @param {Array} contracts - Array to append loaded contracts to
-   * @private
-   */
   _loadContractFile(contractPath, providerDir, file, contracts) {
     try {
       const contractContent = fs.readFileSync(contractPath, "utf8");
       const contract = JSON.parse(contractContent);
       contracts.push(contract);
-      console.log(`Loaded Pact contract: ${providerDir}/${file}`);
+      console.log(`Loaded: ${providerDir}/${file}`);
     } catch (error) {
       console.error(`Error parsing contract ${contractPath}:`, error.message);
     }
@@ -366,185 +370,142 @@ const ContractLoader = {
 };
 
 // ============================================================================
-// ROUTE HANDLING
+// ROUTE BUILDING
 // ============================================================================
 
 const RouteBuilder = {
-  /**
-   * Extracts API routes from Pact contracts
-   * @param {Array} contracts - Array of contract objects
-   * @returns {Object} Map of routes to response configurations
-   */
   buildRoutes(contracts) {
     const routes = {};
 
-    contracts.forEach((contract) => {
-      (contract.interactions || []).forEach((interaction) => {
-        this._processInteraction(interaction, routes);
+    // Process contract interactions
+    contracts.forEach(contract => {
+      (contract.interactions || []).forEach(interaction => {
+        this._processInteraction(interaction, routes, false);
       });
     });
+
+    // Process custom routes
+    const customRouteCount = this._processCustomRoutes(routes);
+
+    StateManager.validateNoConflicts();
 
     return routes;
   },
 
-  /**
-   * Processes a single interaction from a contract
-   * @param {Object} interaction - Interaction object from contract
-   * @param {Object} routes - Routes map to add to
-   * @private
-   */
-  _processInteraction(interaction, routes) {
+  _processCustomRoutes(routes) {
+    let count = 0;
+    
+    CUSTOM_ROUTES.forEach(customRoute => {
+      const { method, path, state, response } = customRoute;
+      const routeKey = createRouteKey(method, path);
+      const routeConfig = createRouteConfig(response);
+
+      routes[routeKey] = routeConfig;
+
+      const mockInteraction = {
+        state: state || null,
+        request: { method: method.toUpperCase(), path },
+        response
+      };
+
+      StateManager.addRoute(routeKey, mockInteraction, routeConfig, true);
+
+      console.log(`Added custom route: ${method.toUpperCase()} ${path}${state ? ` (state: ${state})` : ''}`);
+      count++;
+    });
+    
+    return count;
+  },
+
+  _processInteraction(interaction, routes, isCustom = false) {
     const { request, response } = interaction;
     const method = request.method.toUpperCase();
     const path = request.path;
+    const routeKey = createRouteKey(method, path);
+    const routeConfig = createRouteConfig(response);
 
-    // Create a route key in format "METHOD:path"
-    const routeKey = `${method}:${path}`;
-
-    const routeConfig = {
-      status: response.status || 200,
-      headers: response.headers || {
-        "Content-Type": CONFIG.defaultContentType,
-      },
-      body: response.body,
-    };
-
-    // Store in both old format (for backward compatibility) and new state-aware format
     routes[routeKey] = routeConfig;
+    StateManager.addRoute(routeKey, interaction, routeConfig, isCustom);
 
-    // Add interaction to provider state manager
-    ProviderStateManager.addInteraction(routeKey, interaction, routeConfig);
-
-    console.log(`Added route: ${method} ${path}`);
-    const states = ProviderStateManager._extractStates(interaction);
-    if (states.length > 0) {
-      console.log(`  Provider states: ${states.join(", ")}`);
-    }
-    console.log("Route details:", {
-      method,
-      path,
-      status: response.status || 200,
-      headers: response.headers || {
-        "Content-Type": CONFIG.defaultContentType,
-      },
-      body: response.body,
-      providerStates: states,
-    });
+    const states = extractStates(interaction);
+    const routeType = isCustom ? "custom route" : "route";
+    console.log(`Added ${routeType}: ${method} ${path}${states.length > 0 ? ` (states: ${states.join(", ")})` : ''}`);
   },
 };
 
 // ============================================================================
-// SERVER HANDLING
+// HTTP SERVER
 // ============================================================================
 
-const ServerHandler = {
-  /**
-   * Creates an HTTP server that responds based on the route configuration
-   * @param {Object} routes - Map of routes to response configurations
-   * @returns {http.Server} Configured HTTP server
-   */
-  createServer(routes) {
+const Server = {
+  create(routes) {
     return http.createServer((req, res) => {
       this._handleRequest(req, res, routes);
     });
   },
 
-  /**
-   * Handles an individual HTTP request
-   * @param {http.IncomingMessage} req - HTTP request
-   * @param {http.ServerResponse} res - HTTP response
-   * @param {Object} routes - Map of routes to response configurations
-   * @private
-   */
   _handleRequest(req, res, routes) {
     this._setCorsHeaders(res);
 
-    // Handle preflight requests
     if (req.method === "OPTIONS") {
       res.writeHead(204);
       res.end();
       return;
     }
 
-    // Handle state management APIs
-    if (this._isStateManagementAPI(req)) {
-      this._handleStateManagementAPI(req, res);
+    if (this._isStateAPI(req)) {
+      this._handleStateAPI(req, res);
       return;
     }
 
-    const routeKey = `${req.method}:${req.url}`;
-
-    // Try state-aware route matching first, then fall back to original routes
-    const stateAwareRoute = ProviderStateManager.getMatchingRoute(routeKey);
-    const routeConfig = stateAwareRoute || routes[routeKey];
+    const routeKey = createRouteKey(req.method, req.url);
+    const stateAwareMatch = StateManager.findRoute(routeKey);
+    const routeConfig = stateAwareMatch || routes[routeKey];
 
     if (routeConfig) {
-      this._handleFoundRoute(req, res, routeConfig);
+      let isCustom = false;
+      if (stateAwareMatch) {
+        const options = StateManager.stateRoutes.get(routeKey);
+        const matchedOption = options?.find(option => option.routeConfig === stateAwareMatch);
+        isCustom = matchedOption?.isCustom || false;
+      }
+      
+      this._sendResponse(req, res, routeConfig, isCustom);
     } else {
-      this._handleNotFoundRoute(req, res, routeKey);
+      this._sendNotFound(req, res);
     }
   },
 
-  /**
-   * Checks if the request is for state management APIs
-   * @param {http.IncomingMessage} req - HTTP request
-   * @returns {boolean} True if this is a state management API call
-   * @private
-   */
-  _isStateManagementAPI(req) {
-    return (
-      req.url === "/api/mock-server/state" ||
-      req.url === "/api/mock-server/reset"
-    );
+  _isStateAPI(req) {
+    return req.url === "/api/mock-server/state" || req.url === "/api/mock-server/reset";
   },
 
-  /**
-   * Handles state management API requests
-   * @param {http.IncomingMessage} req - HTTP request
-   * @param {http.ServerResponse} res - HTTP response
-   * @private
-   */
-  _handleStateManagementAPI(req, res) {
+  _handleStateAPI(req, res) {
     if (req.url === "/api/mock-server/state" && req.method === "POST") {
       this._handleSetState(req, res);
     } else if (req.url === "/api/mock-server/reset" && req.method === "POST") {
       this._handleResetState(req, res);
     } else {
-      res.writeHead(405, { "Content-Type": CONFIG.defaultContentType });
+      res.writeHead(405, { "Content-Type": CONFIG.contentType });
       res.end(JSON.stringify({ error: "Method not allowed" }));
     }
   },
 
-  /**
-   * Handles state setting API
-   * @param {http.IncomingMessage} req - HTTP request
-   * @param {http.ServerResponse} res - HTTP response
-   * @private
-   */
   _handleSetState(req, res) {
-    this._parseRequestBody(req, (body) => {
+    this._parseBody(req, body => {
       try {
-        const requestData = JSON.parse(body);
-        let states = [];
-
-        // Handle both single state and multiple states
-        if (requestData.state) {
-          states = [requestData.state];
-        } else if (requestData.states?.length) {
-          states = requestData.states;
-        } else {
-          res.writeHead(400, { "Content-Type": CONFIG.defaultContentType });
-          res.end(
-            JSON.stringify({
-              error:
-                'Invalid request format. Expected {"state": "name"} or {"states": ["name1", "name2"]}',
-            }),
-          );
+        const data = JSON.parse(body);
+        const states = data.state ? [data.state] : data.states || [];
+        
+        if (states.length === 0) {
+          res.writeHead(400, { "Content-Type": CONFIG.contentType });
+          res.end(JSON.stringify({
+            error: 'Invalid request format. Expected {"state": "name"} or {"states": ["name1", "name2"]}'
+          }));
           return;
         }
 
-        const result = ProviderStateManager.setStates(states, requestData.path);
-
+        const result = StateManager.setStates(states, data.path);
         const responseBody = {
           message: `Provider state(s) set ${result.warnings.length > 0 ? "with warnings" : "successfully"}`,
           validStates: result.validStates,
@@ -554,140 +515,79 @@ const ServerHandler = {
           }),
         };
 
-        res.writeHead(200, { "Content-Type": CONFIG.defaultContentType });
+        res.writeHead(200, { "Content-Type": CONFIG.contentType });
         res.end(JSON.stringify(responseBody));
 
-        console.log(`Provider states set: ${result.validStates.join(", ")}`);
-        if (requestData.path)
-          console.log(`Limited to path: ${requestData.path}`);
-        if (result.warnings.length > 0)
-          console.log(`Warnings: ${result.warnings.join(", ")}`);
+        console.log(`States set: ${result.validStates.join(", ")}`);
+        if (data.path) console.log(`Limited to path: ${data.path}`);
+        if (result.warnings.length > 0) console.log(`Warnings: ${result.warnings.join(", ")}`);
       } catch (error) {
-        res.writeHead(400, { "Content-Type": CONFIG.defaultContentType });
-        res.end(
-          JSON.stringify({
-            error: "Invalid JSON in request body" + error.message,
-            availableStates: ProviderStateManager.getAvailableStates(),
-          }),
-        );
+        res.writeHead(400, { "Content-Type": CONFIG.contentType });
+        res.end(JSON.stringify({
+          error: "Invalid JSON: " + error.message,
+          availableStates: StateManager.getAvailableStates(),
+        }));
       }
     });
   },
 
-  /**
-   * Handles state reset API
-   * @param {http.IncomingMessage} req - HTTP request
-   * @param {http.ServerResponse} res - HTTP response
-   * @private
-   */
   _handleResetState(req, res) {
-    ProviderStateManager.reset();
-
-    res.writeHead(200, { "Content-Type": CONFIG.defaultContentType });
-    res.end(
-      JSON.stringify({
-        message: "Provider states reset to default behavior",
-      }),
-    );
-
-    console.log("Provider states reset to default behavior");
+    StateManager.reset();
+    res.writeHead(200, { "Content-Type": CONFIG.contentType });
+    res.end(JSON.stringify({ message: "Provider states reset to default behavior" }));
+    console.log("States reset to default behavior");
   },
 
-  /**
-   * Parses request body
-   * @param {http.IncomingMessage} req - HTTP request
-   * @param {Function} callback - Callback function with parsed body
-   * @private
-   */
-  _parseRequestBody(req, callback) {
+  _parseBody(req, callback) {
     let body = "";
-    req.on("data", (chunk) => {
-      body += chunk.toString();
-    });
-    req.on("end", () => {
-      callback(body);
-    });
+    req.on("data", chunk => { body += chunk.toString(); });
+    req.on("end", () => callback(body));
   },
 
-  /**
-   * Sets CORS headers on the response
-   * @param {http.ServerResponse} res - HTTP response
-   * @private
-   */
   _setCorsHeaders(res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader(
-      "Access-Control-Allow-Methods",
-      "GET, POST, PUT, DELETE, OPTIONS",
-    );
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   },
 
-  /**
-   * Handles a request that matches a known route
-   * @param {http.IncomingMessage} req - HTTP request
-   * @param {http.ServerResponse} res - HTTP response
-   * @param {Object} routeConfig - Configuration for the matched route
-   * @private
-   */
-  _handleFoundRoute(req, res, routeConfig) {
+  _sendResponse(req, res, routeConfig, isCustom = false) {
     const { status, headers, body } = routeConfig;
 
-    // Set response headers
     Object.entries(headers).forEach(([key, value]) => {
       res.setHeader(key, value);
     });
 
-    // Send response
     res.writeHead(status);
     res.end(JSON.stringify(body));
 
-    Logger.logRequest(req.method, req.url, status, true);
+    Logger.logRequest(req.method, req.url, status, true, isCustom);
   },
 
-  /**
-   * Handles a request that doesn't match any known route
-   * @param {http.IncomingMessage} req - HTTP request
-   * @param {http.ServerResponse} res - HTTP response
-   * @param {string} routeKey - Route key that wasn't found
-   * @private
-   */
-  _handleNotFoundRoute(req, res, routeKey) {
-    res.writeHead(404, { "Content-Type": CONFIG.defaultContentType });
-    res.end(JSON.stringify({ error: "Not found in Pact contracts" }));
-
-    Logger.logRequest(req.method, req.url, routeKey, 404, false);
+  _sendNotFound(req, res) {
+    res.writeHead(404, { "Content-Type": CONFIG.contentType });
+    res.end(JSON.stringify({ error: "Not found in Pact contracts or custom routes" }));
+    Logger.logRequest(req.method, req.url, 404, false);
   },
 };
 
 // ============================================================================
-// APPLICATION ENTRY POINT
+// MAIN
 // ============================================================================
 
-/**
- * Main function that initializes and starts the mock server
- */
 function startMockServer() {
   Logger.logConfig();
 
   const contracts = ContractLoader.loadContracts();
-  console.log("Loaded contracts:", contracts);
-  contracts.forEach((contract) => {
-    (contract.interactions || []).forEach((interaction) => {
-      console.log("Interaction:", JSON.stringify(interaction));
-    });
-  });
   const routes = RouteBuilder.buildRoutes(contracts);
 
-  Logger.logServerStart(contracts, routes);
+  Logger.logServerStart(contracts, routes, CUSTOM_ROUTES.length);
 
-  const server = ServerHandler.createServer(routes);
+  const server = Server.create(routes);
 
   server.listen(CONFIG.port, () => {
     Logger.logServerReady(routes);
-    Logger.logProviderStateHelp();
+    Logger.logStateHelp();
   });
 }
 
-// Start the server
 startMockServer();
