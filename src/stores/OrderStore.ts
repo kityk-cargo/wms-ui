@@ -7,6 +7,8 @@ import {
   deleteOrder,
 } from '../services/api';
 import { Order, OrderCreate } from '../types';
+import { CommonErrorType } from '../types/errors';
+import { convertToCommonError } from '../utils/errorHelpers';
 import { RootStore } from './RootStore';
 
 /**
@@ -17,7 +19,7 @@ export class OrderStore {
   orders: Order[] = [];
   currentOrder: Order | null = null;
   loading: boolean = false;
-  error: string | null = null;
+  error: string | CommonErrorType | null = null;
 
   // Root store reference
   rootStore: RootStore;
@@ -48,7 +50,10 @@ export class OrderStore {
       });
     } catch (err) {
       runInAction(() => {
-        this.error = 'Failed to fetch orders. Please try again later.';
+        this.error = convertToCommonError(
+          err,
+          'Failed to fetch orders. Please try again later.',
+        );
         this.loading = false;
       });
       console.error(err);
@@ -73,7 +78,10 @@ export class OrderStore {
       });
     } catch (err) {
       runInAction(() => {
-        this.error = `Failed to fetch order with ID ${id}. Please try again later.`;
+        this.error = convertToCommonError(
+          err,
+          `Failed to fetch order with ID ${id}. Please try again later.`,
+        );
         this.loading = false;
       });
       console.error(err);
@@ -100,7 +108,10 @@ export class OrderStore {
       return newOrder;
     } catch (err) {
       runInAction(() => {
-        this.error = 'Failed to create order. Please try again later.';
+        this.error = convertToCommonError(
+          err,
+          'Failed to create order. Please try again later.',
+        );
         this.loading = false;
       });
       console.error(err);
@@ -138,7 +149,10 @@ export class OrderStore {
       return updatedOrder;
     } catch (err) {
       runInAction(() => {
-        this.error = `Failed to update order with ID ${id}. Please try again later.`;
+        this.error = convertToCommonError(
+          err,
+          `Failed to update order with ID ${id}. Please try again later.`,
+        );
         this.loading = false;
       });
       console.error(err);
@@ -171,7 +185,10 @@ export class OrderStore {
       return true;
     } catch (err) {
       runInAction(() => {
-        this.error = `Failed to delete order with ID ${id}. Please try again later.`;
+        this.error = convertToCommonError(
+          err,
+          `Failed to delete order with ID ${id}. Please try again later.`,
+        );
         this.loading = false;
       });
       console.error(err);
@@ -189,7 +206,7 @@ export class OrderStore {
   /**
    * Set error message
    */
-  setError = (error: string | null): void => {
+  setError = (error: string | CommonErrorType | null): void => {
     this.error = error;
   };
 

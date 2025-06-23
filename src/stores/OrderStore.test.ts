@@ -76,9 +76,11 @@ describe('OrderStore', () => {
       // Assert
       expect(orderStore.orders).toEqual([]);
       expect(orderStore.loading).toBe(false);
-      expect(orderStore.error).toBe(
-        'Failed to fetch orders. Please try again later.',
-      );
+      expect(orderStore.error).toEqual({
+        criticality: 'critical',
+        id: '',
+        detail: 'Failed to fetch orders. Please try again later.',
+      });
     });
 
     it('should load a single order by ID', async () => {
@@ -109,9 +111,11 @@ describe('OrderStore', () => {
       // Assert
       expect(orderStore.currentOrder).toBeNull();
       expect(orderStore.loading).toBe(false);
-      expect(orderStore.error).toBe(
-        `Failed to fetch order with ID ${orderId}. Please try again later.`,
-      );
+      expect(orderStore.error).toEqual({
+        criticality: 'critical',
+        id: '',
+        detail: `Failed to fetch order with ID ${orderId}. Please try again later.`,
+      });
     });
   });
 
@@ -151,9 +155,11 @@ describe('OrderStore', () => {
 
       // Assert
       expect(result).toBeNull();
-      expect(orderStore.error).toBe(
-        'Failed to create order. Please try again later.',
-      );
+      expect(orderStore.error).toEqual({
+        criticality: 'critical',
+        id: '',
+        detail: 'Failed to create order. Please try again later.',
+      });
     });
 
     it('should update an existing order successfully', async () => {
@@ -195,9 +201,11 @@ describe('OrderStore', () => {
 
       // Assert
       expect(result).toBeNull();
-      expect(orderStore.error).toBe(
-        `Failed to update order with ID ${orderId}. Please try again later.`,
-      );
+      expect(orderStore.error).toEqual({
+        criticality: 'critical',
+        id: '',
+        detail: `Failed to update order with ID ${orderId}. Please try again later.`,
+      });
     });
 
     it('should delete an order successfully', async () => {
@@ -231,9 +239,11 @@ describe('OrderStore', () => {
 
       // Assert
       expect(result).toBe(false);
-      expect(orderStore.error).toBe(
-        `Failed to delete order with ID ${orderId}. Please try again later.`,
-      );
+      expect(orderStore.error).toEqual({
+        criticality: 'critical',
+        id: '',
+        detail: `Failed to delete order with ID ${orderId}. Please try again later.`,
+      });
     });
   });
 
