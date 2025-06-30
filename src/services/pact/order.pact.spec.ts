@@ -53,12 +53,19 @@ const orderSchema = {
   updatedAt: Matchers.iso8601DateTime(),
 };
 
-describe('Orders API Pact with Matchers', () => {
+// Create a common error format template
+const commonErrorTemplate = {
+  criticality: Matchers.string('critical'),
+  id: Matchers.uuid(),
+  detail: Matchers.string('Error message will go here'),
+};
+
+describe('Orders API Pact', () => {
   const provider = new Pact({
     consumer: 'wms_ui',
     provider: 'wms_order_management',
     port: PACT_PORT,
-    log: path.join(PROJECT_ROOT, 'logs', 'order-pact-matcher.log'),
+    log: path.join(PROJECT_ROOT, 'logs', 'order-pact.log'),
     dir: path.join(PROJECT_ROOT, 'pacts'),
     pactfileWriteMode: 'merge',
     logLevel: 'warn',
@@ -76,12 +83,12 @@ describe('Orders API Pact with Matchers', () => {
     await provider.verify();
   });
 
-  describe('get all orders with matchers', () => {
+  describe('get all orders', () => {
     it('returns all orders', async () => {
       // Arrange - Setup the expected interaction with matchers
       await provider.addInteraction({
         state: 'orders exist',
-        uponReceiving: 'a request for all orders with matchers',
+        uponReceiving: 'a request for all orders',
         withRequest: {
           method: 'GET',
           path: '/api/v1/orders',
@@ -115,7 +122,34 @@ describe('Orders API Pact with Matchers', () => {
     });
   });
 
-  describe('get order by id with matchers', () => {
+  describe('get all orders - server error', () => {
+    it('handles server errors gracefully', async () => {
+      // Arrange - Setup the expected interaction
+      await provider.addInteraction({
+        state: 'server is experiencing issues',
+        uponReceiving: 'a request for orders during server errors',
+        withRequest: {
+          method: 'GET',
+          path: '/api/v1/orders',
+        },
+        willRespondWith: {
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: {
+            ...commonErrorTemplate,
+            detail: Matchers.string('Internal server error'),
+          },
+        },
+      });
+
+      // Act & Assert - Expect the request to throw an error
+      await expect(fetchOrders()).rejects.toThrow('Internal server error');
+    });
+  });
+
+  describe('get order by id', () => {
     it('returns a specific order', async () => {
       const orderId = 1;
 
@@ -150,7 +184,38 @@ describe('Orders API Pact with Matchers', () => {
     });
   });
 
-  describe('create order with matchers', () => {
+  describe('get order by id - not found', () => {
+    it('returns a 404 when order does not exist', async () => {
+      const nonExistentOrderId = 9999;
+
+      // Arrange - Setup the expected interaction
+      await provider.addInteraction({
+        state: `order with ID ${nonExistentOrderId} does not exist`,
+        uponReceiving: `a request for non-existent order with ID ${nonExistentOrderId}`,
+        withRequest: {
+          method: 'GET',
+          path: `/api/v1/orders/${nonExistentOrderId}`,
+        },
+        willRespondWith: {
+          status: 404,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: {
+            ...commonErrorTemplate,
+            detail: Matchers.string('Order not found'),
+          },
+        },
+      });
+
+      // Act & Assert - Expect the request to throw an error
+      await expect(fetchOrder(nonExistentOrderId)).rejects.toThrow(
+        'Order not found',
+      );
+    });
+  });
+
+  describe('create order', () => {
     it('creates a new order', async () => {
       // Define the order creation payload
       const orderData: OrderCreate = {
@@ -203,7 +268,92 @@ describe('Orders API Pact with Matchers', () => {
     });
   });
 
-  describe('update order with matchers', () => {
+  describe('create order - validation error', () => {
+    it('returns a 400 with validation errors when order data is invalid', async () => {
+      // Invalid order data - missing required fields
+      const invalidOrderData: OrderCreate = {
+        customerId: 0, // Invalid customer ID
+        items: [], // Empty items array
+      };
+
+      // Arrange - Setup the expected interaction
+      await provider.addInteraction({
+        state: 'order validation will fail',
+        uponReceiving: 'a request to create an invalid order',
+        withRequest: {
+          method: 'POST',
+          path: '/api/v1/orders',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: invalidOrderData,
+        },
+        willRespondWith: {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: {
+            ...commonErrorTemplate,
+            detail: Matchers.string(
+              'Validation error: Customer ID must be greater than 0 and order must contain at least one item',
+            ),
+          },
+        },
+      });
+
+      // Act & Assert - Expect the request to throw an error
+      await expect(createOrder(invalidOrderData)).rejects.toThrow(
+        'Validation error: Customer ID must be greater than 0 and order must contain at least one item',
+      );
+    });
+  });
+
+  describe('create order - product not found', () => {
+    it('returns a 400 when referenced product does not exist', async () => {
+      // Order with non-existent product
+      const orderWithNonExistentProduct: OrderCreate = {
+        customerId: 1,
+        items: [
+          {
+            productId: 9999, // Non-existent product ID
+            quantity: 1,
+          },
+        ],
+      };
+
+      // Arrange - Setup the expected interaction
+      await provider.addInteraction({
+        state: 'product with ID 9999 does not exist',
+        uponReceiving: 'a request to create an order with non-existent product',
+        withRequest: {
+          method: 'POST',
+          path: '/api/v1/orders',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: orderWithNonExistentProduct,
+        },
+        willRespondWith: {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: {
+            ...commonErrorTemplate,
+            detail: Matchers.string('Product not found'),
+          },
+        },
+      });
+
+      // Act & Assert - Expect the request to throw an error
+      await expect(createOrder(orderWithNonExistentProduct)).rejects.toThrow(
+        'Product not found',
+      );
+    });
+  });
+
+  describe('update order', () => {
     it('updates an existing order', async () => {
       const orderId = 1;
       // Order data for update - only status field in this example
@@ -269,7 +419,7 @@ describe('Orders API Pact with Matchers', () => {
     });
   });
 
-  describe('delete order with matchers', () => {
+  describe('delete order', () => {
     it('deletes an existing order', async () => {
       const orderId = 1;
 
