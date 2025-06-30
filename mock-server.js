@@ -69,6 +69,7 @@ const CUSTOM_ROUTES = [
       status: 500,
       headers: { "Content-Type": "application/json" },
       body: {
+        id: "ce118b6e-d8e1-11e7-9296-cec278b6b50a",
         error: "Internal Server Error",
         message: "Products service is currently unavailable",
         code: "PRODUCTS_SERVICE_ERROR",
