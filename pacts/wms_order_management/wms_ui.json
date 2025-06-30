@@ -1,0 +1,531 @@
+{
+  "consumer": {
+    "name": "wms_ui"
+  },
+  "interactions": [
+    {
+      "description": "a request for all orders",
+      "providerState": "orders exist",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/orders"
+      },
+      "response": {
+        "body": [
+          {
+            "createdAt": "2015-08-06T16:53:10+01:00",
+            "customerId": 1,
+            "id": 1,
+            "items": [
+              {
+                "id": 1,
+                "price": 19.99,
+                "productId": 1,
+                "quantity": 1
+              }
+            ],
+            "orderDate": "2015-08-06T16:53:10+01:00",
+            "status": "Pending",
+            "totalAmount": 99.99,
+            "updatedAt": "2015-08-06T16:53:10+01:00"
+          },
+          {
+            "createdAt": "2015-08-06T16:53:10+01:00",
+            "customerId": 1,
+            "id": 1,
+            "items": [
+              {
+                "id": 1,
+                "price": 19.99,
+                "productId": 1,
+                "quantity": 1
+              }
+            ],
+            "orderDate": "2015-08-06T16:53:10+01:00",
+            "status": "Pending",
+            "totalAmount": 99.99,
+            "updatedAt": "2015-08-06T16:53:10+01:00"
+          }
+        ],
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body": {
+            "match": "type",
+            "min": 2
+          },
+          "$.body[*].createdAt": {
+            "match": "regex",
+            "regex": "^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$"
+          },
+          "$.body[*].customerId": {
+            "match": "type"
+          },
+          "$.body[*].id": {
+            "match": "type"
+          },
+          "$.body[*].items": {
+            "match": "type",
+            "min": 1
+          },
+          "$.body[*].items[*].id": {
+            "match": "type"
+          },
+          "$.body[*].items[*].price": {
+            "match": "type"
+          },
+          "$.body[*].items[*].productId": {
+            "match": "type"
+          },
+          "$.body[*].items[*].quantity": {
+            "match": "type"
+          },
+          "$.body[*].orderDate": {
+            "match": "regex",
+            "regex": "^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$"
+          },
+          "$.body[*].status": {
+            "match": "regex",
+            "regex": "Pending|Allocated|Processing|Shipped|Delivered|Cancelled"
+          },
+          "$.body[*].totalAmount": {
+            "match": "type"
+          },
+          "$.body[*].updatedAt": {
+            "match": "regex",
+            "regex": "^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request for non-existent order with ID 9999",
+      "providerState": "order with ID 9999 does not exist",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/orders/9999"
+      },
+      "response": {
+        "body": {
+          "criticality": "critical",
+          "detail": "Order not found",
+          "id": "ce118b6e-d8e1-11e7-9296-cec278b6b50a"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.criticality": {
+            "match": "type"
+          },
+          "$.body.detail": {
+            "match": "type"
+          },
+          "$.body.id": {
+            "match": "regex",
+            "regex": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$"
+          }
+        },
+        "status": 404
+      }
+    },
+    {
+      "description": "a request for order with ID 1",
+      "providerState": "order with ID 1 exists",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/orders/1"
+      },
+      "response": {
+        "body": {
+          "createdAt": "2015-08-06T16:53:10+01:00",
+          "customerId": 1,
+          "id": 1,
+          "items": [
+            {
+              "id": 1,
+              "price": 19.99,
+              "productId": 1,
+              "quantity": 1
+            }
+          ],
+          "orderDate": "2015-08-06T16:53:10+01:00",
+          "status": "Pending",
+          "totalAmount": 99.99,
+          "updatedAt": "2015-08-06T16:53:10+01:00"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.createdAt": {
+            "match": "regex",
+            "regex": "^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$"
+          },
+          "$.body.customerId": {
+            "match": "type"
+          },
+          "$.body.id": {
+            "match": "type"
+          },
+          "$.body.items": {
+            "match": "type",
+            "min": 1
+          },
+          "$.body.items[*].id": {
+            "match": "type"
+          },
+          "$.body.items[*].price": {
+            "match": "type"
+          },
+          "$.body.items[*].productId": {
+            "match": "type"
+          },
+          "$.body.items[*].quantity": {
+            "match": "type"
+          },
+          "$.body.orderDate": {
+            "match": "regex",
+            "regex": "^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$"
+          },
+          "$.body.status": {
+            "match": "regex",
+            "regex": "Pending|Allocated|Processing|Shipped|Delivered|Cancelled"
+          },
+          "$.body.totalAmount": {
+            "match": "type"
+          },
+          "$.body.updatedAt": {
+            "match": "regex",
+            "regex": "^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request for orders during server errors",
+      "providerState": "server is experiencing issues",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/orders"
+      },
+      "response": {
+        "body": {
+          "criticality": "critical",
+          "detail": "Internal server error",
+          "id": "ce118b6e-d8e1-11e7-9296-cec278b6b50a"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.criticality": {
+            "match": "type"
+          },
+          "$.body.detail": {
+            "match": "type"
+          },
+          "$.body.id": {
+            "match": "regex",
+            "regex": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$"
+          }
+        },
+        "status": 500
+      }
+    },
+    {
+      "description": "a request to create a new order",
+      "providerState": "can create a new order",
+      "request": {
+        "body": {
+          "customerId": 1,
+          "items": [
+            {
+              "productId": 1,
+              "quantity": 2
+            },
+            {
+              "productId": 2,
+              "quantity": 1
+            }
+          ]
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/api/v1/orders"
+      },
+      "response": {
+        "body": {
+          "createdAt": "2015-08-06T16:53:10+01:00",
+          "customerId": 1,
+          "id": 1,
+          "items": [
+            {
+              "id": 1,
+              "price": 19.99,
+              "productId": 1,
+              "quantity": 1
+            }
+          ],
+          "orderDate": "2015-08-06T16:53:10+01:00",
+          "status": "Pending",
+          "totalAmount": 99.99,
+          "updatedAt": "2015-08-06T16:53:10+01:00"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.createdAt": {
+            "match": "regex",
+            "regex": "^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$"
+          },
+          "$.body.customerId": {
+            "match": "type"
+          },
+          "$.body.id": {
+            "match": "type"
+          },
+          "$.body.items": {
+            "match": "type",
+            "min": 1
+          },
+          "$.body.items[*].id": {
+            "match": "type"
+          },
+          "$.body.items[*].price": {
+            "match": "type"
+          },
+          "$.body.items[*].productId": {
+            "match": "type"
+          },
+          "$.body.items[*].quantity": {
+            "match": "type"
+          },
+          "$.body.orderDate": {
+            "match": "regex",
+            "regex": "^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$"
+          },
+          "$.body.status": {
+            "match": "regex",
+            "regex": "Pending|Allocated|Processing|Shipped|Delivered|Cancelled"
+          },
+          "$.body.totalAmount": {
+            "match": "type"
+          },
+          "$.body.updatedAt": {
+            "match": "regex",
+            "regex": "^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$"
+          }
+        },
+        "status": 201
+      }
+    },
+    {
+      "description": "a request to create an invalid order",
+      "providerState": "order validation will fail",
+      "request": {
+        "body": {
+          "customerId": 0,
+          "items": []
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/api/v1/orders"
+      },
+      "response": {
+        "body": {
+          "criticality": "critical",
+          "detail": "Validation error: Customer ID must be greater than 0 and order must contain at least one item",
+          "id": "ce118b6e-d8e1-11e7-9296-cec278b6b50a"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.criticality": {
+            "match": "type"
+          },
+          "$.body.detail": {
+            "match": "type"
+          },
+          "$.body.id": {
+            "match": "regex",
+            "regex": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$"
+          }
+        },
+        "status": 400
+      }
+    },
+    {
+      "description": "a request to create an order with non-existent product",
+      "providerState": "product with ID 9999 does not exist",
+      "request": {
+        "body": {
+          "customerId": 1,
+          "items": [
+            {
+              "productId": 9999,
+              "quantity": 1
+            }
+          ]
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/api/v1/orders"
+      },
+      "response": {
+        "body": {
+          "criticality": "critical",
+          "detail": "Product not found",
+          "id": "ce118b6e-d8e1-11e7-9296-cec278b6b50a"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.criticality": {
+            "match": "type"
+          },
+          "$.body.detail": {
+            "match": "type"
+          },
+          "$.body.id": {
+            "match": "regex",
+            "regex": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$"
+          }
+        },
+        "status": 400
+      }
+    },
+    {
+      "description": "a request to delete order with ID 1",
+      "providerState": "order with ID 1 exists",
+      "request": {
+        "method": "DELETE",
+        "path": "/api/v1/orders/1"
+      },
+      "response": {
+        "status": 204
+      }
+    },
+    {
+      "description": "a request to update order with ID 1",
+      "providerState": "order with ID 1 exists",
+      "request": {
+        "body": {
+          "createdAt": "2023-04-01T10:00:00Z",
+          "customerId": 1,
+          "id": 1,
+          "items": [
+            {
+              "id": 1,
+              "price": 49.99,
+              "productId": 1,
+              "quantity": 3
+            }
+          ],
+          "orderDate": "2023-04-01T10:00:00Z",
+          "status": "Processing",
+          "totalAmount": 149.99,
+          "updatedAt": "2023-04-02T10:00:00Z"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "PUT",
+        "path": "/api/v1/orders/1"
+      },
+      "response": {
+        "body": {
+          "createdAt": "2015-08-06T16:53:10+01:00",
+          "customerId": 1,
+          "id": 1,
+          "items": [
+            {
+              "id": 1,
+              "price": 19.99,
+              "productId": 1,
+              "quantity": 1
+            }
+          ],
+          "orderDate": "2015-08-06T16:53:10+01:00",
+          "status": "Processing",
+          "totalAmount": 99.99,
+          "updatedAt": "2015-08-06T16:53:10+01:00"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.createdAt": {
+            "match": "regex",
+            "regex": "^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$"
+          },
+          "$.body.customerId": {
+            "match": "type"
+          },
+          "$.body.id": {
+            "match": "type"
+          },
+          "$.body.items": {
+            "match": "type",
+            "min": 1
+          },
+          "$.body.items[*].id": {
+            "match": "type"
+          },
+          "$.body.items[*].price": {
+            "match": "type"
+          },
+          "$.body.items[*].productId": {
+            "match": "type"
+          },
+          "$.body.items[*].quantity": {
+            "match": "type"
+          },
+          "$.body.orderDate": {
+            "match": "regex",
+            "regex": "^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$"
+          },
+          "$.body.status": {
+            "match": "regex",
+            "regex": "Pending|Allocated|Processing|Shipped|Delivered|Cancelled"
+          },
+          "$.body.totalAmount": {
+            "match": "type"
+          },
+          "$.body.updatedAt": {
+            "match": "regex",
+            "regex": "^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$"
+          }
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "15.0.1"
+    },
+    "pactRust": {
+      "ffi": "0.4.22",
+      "models": "1.2.3"
+    },
+    "pactSpecification": {
+      "version": "2.0.0"
+    }
+  },
+  "provider": {
+    "name": "wms_order_management"
+  }
+}

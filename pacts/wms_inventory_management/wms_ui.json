@@ -1,0 +1,195 @@
+{
+  "consumer": {
+    "name": "wms_ui"
+  },
+  "interactions": [
+    {
+      "description": "a request during server issues",
+      "providerState": "product service is experiencing issues",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/products/1"
+      },
+      "response": {
+        "body": {
+          "criticality": "critical",
+          "detail": "Internal server error",
+          "id": "ce118b6e-d8e1-11e7-9296-cec278b6b50a"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.criticality": {
+            "match": "type"
+          },
+          "$.body.detail": {
+            "match": "type"
+          },
+          "$.body.id": {
+            "match": "regex",
+            "regex": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$"
+          }
+        },
+        "status": 500
+      }
+    },
+    {
+      "description": "a request for all products",
+      "providerState": "products exist",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/products"
+      },
+      "response": {
+        "body": [
+          {
+            "category": "Category",
+            "created_at": "2015-08-06T16:53:10+01:00",
+            "description": "Product description",
+            "id": 1,
+            "name": "Product Name",
+            "sku": "SKU123",
+            "updated_at": "2015-08-06T16:53:10+01:00"
+          },
+          {
+            "category": "Category",
+            "created_at": "2015-08-06T16:53:10+01:00",
+            "description": "Product description",
+            "id": 1,
+            "name": "Product Name",
+            "sku": "SKU123",
+            "updated_at": "2015-08-06T16:53:10+01:00"
+          }
+        ],
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body": {
+            "match": "type",
+            "min": 2
+          },
+          "$.body[*].category": {
+            "match": "type"
+          },
+          "$.body[*].created_at": {
+            "match": "regex",
+            "regex": "^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$"
+          },
+          "$.body[*].description": {
+            "match": "type"
+          },
+          "$.body[*].id": {
+            "match": "type"
+          },
+          "$.body[*].name": {
+            "match": "type"
+          },
+          "$.body[*].sku": {
+            "match": "type"
+          },
+          "$.body[*].updated_at": {
+            "match": "regex",
+            "regex": "^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request for non-existent product with ID 9999",
+      "providerState": "product with ID 9999 does not exist",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/products/9999"
+      },
+      "response": {
+        "body": {
+          "criticality": "critical",
+          "detail": "Product not found",
+          "id": "ce118b6e-d8e1-11e7-9296-cec278b6b50a"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.criticality": {
+            "match": "type"
+          },
+          "$.body.detail": {
+            "match": "type"
+          },
+          "$.body.id": {
+            "match": "regex",
+            "regex": "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$"
+          }
+        },
+        "status": 404
+      }
+    },
+    {
+      "description": "a request for product with ID 1",
+      "providerState": "product with ID 1 exists",
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/products/1"
+      },
+      "response": {
+        "body": {
+          "category": "Category",
+          "created_at": "2015-08-06T16:53:10+01:00",
+          "description": "Product description",
+          "id": 1,
+          "name": "Product Name",
+          "sku": "SKU123",
+          "updated_at": "2015-08-06T16:53:10+01:00"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.category": {
+            "match": "type"
+          },
+          "$.body.created_at": {
+            "match": "regex",
+            "regex": "^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$"
+          },
+          "$.body.description": {
+            "match": "type"
+          },
+          "$.body.id": {
+            "match": "type"
+          },
+          "$.body.name": {
+            "match": "type"
+          },
+          "$.body.sku": {
+            "match": "type"
+          },
+          "$.body.updated_at": {
+            "match": "regex",
+            "regex": "^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z)$"
+          }
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "15.0.1"
+    },
+    "pactRust": {
+      "ffi": "0.4.22",
+      "models": "1.2.3"
+    },
+    "pactSpecification": {
+      "version": "2.0.0"
+    }
+  },
+  "provider": {
+    "name": "wms_inventory_management"
+  }
+}
